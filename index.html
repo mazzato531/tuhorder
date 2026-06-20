@@ -3,28 +3,29 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TUHORDER</title>
-    
-    <!-- React desde CDN -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
+    <title>TUHORDER - Suministros</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
+        
+        body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f5;
             display: flex;
             justify-content: center;
             min-height: 100vh;
         }
-        #root {
+        
+        #app {
             width: 100%;
             max-width: 420px;
             min-height: 100vh;
             background: #f5f5f5;
+            padding: 16px;
+            padding-bottom: 80px;
+            position: relative;
         }
+        
+        /* Toast */
         .toast {
             position: fixed;
             top: 20px;
@@ -37,991 +38,1303 @@
             font-size: 14px;
             z-index: 999;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            animation: slideDown 0.3s ease-out;
+            display: none;
         }
-        .fade-in {
+        
+        .toast.show {
+            display: block;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translate(-50%, -20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .page {
             animation: fadeIn 0.3s ease-out;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        /* Header */
+        .header {
+            background: #fff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .logo {
+            background: #000;
+            color: #fff;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .logo-text {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .logo-sub {
+            font-size: 11px;
+            color: #999;
+        }
+        
+        .btn-logout {
+            background: none;
+            border: 1px solid #ddd;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 420px;
+            background: #fff;
+            border-top: 1px solid #eee;
+            display: flex;
+            padding: 8px 0;
+            z-index: 100;
+        }
+        
+        .nav-btn {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            color: #bbb;
+            font-size: 12px;
+            font-family: inherit;
+        }
+        
+        .nav-btn.active {
+            color: #000;
+            font-weight: bold;
+        }
+        
+        .nav-btn .icon {
+            font-size: 20px;
+        }
+        
+        /* Login */
+        .login-logo {
+            background: #000;
+            color: #fff;
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            margin: 0 auto 12px;
+        }
+        
+        .login-title {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        
+        .login-sub {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        
+        /* Cards */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+        
+        .card-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #bbb;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        
+        /* Hero */
+        .hero {
+            background: #000;
+            border-radius: 16px;
+            padding: 20px;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+        
+        .hero-type {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        
+        .hero-name {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .hero-id {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+        
+        .hero-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+        }
+        
+        .hero-stat-label {
+            font-size: 10px;
+            color: #888;
+        }
+        
+        .hero-stat-value {
+            font-size: 28px;
+            font-weight: 900;
+        }
+        
+        /* Quick Buttons */
+        .quick-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .quick-btn {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .quick-btn .icon {
+            font-size: 28px;
+        }
+        
+        .quick-btn .label {
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        /* Product Row */
+        .product-row {
+            background: #fff;
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid #eee;
+            margin-bottom: 8px;
+        }
+        
+        .product-icon {
+            width: 44px;
+            height: 44px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        
+        .product-info {
+            flex: 1;
+        }
+        
+        .product-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .product-price {
+            font-weight: 700;
+            font-size: 15px;
+            margin-top: 2px;
+        }
+        
+        /* Quantity Controls */
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .qty-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background: #f5f5f5;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .qty-value {
+            font-weight: bold;
+            font-size: 14px;
+            min-width: 20px;
+            text-align: center;
+        }
+        
+        .add-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: none;
+            background: #000;
+            color: #fff;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Float Bar */
+        .float-bar {
+            position: sticky;
+            bottom: 12px;
+            margin-top: 16px;
+            background: #000;
+            color: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary:disabled {
+            background: #ddd;
+            color: #aaa;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            width: 100%;
+            padding: 14px;
+            background: #fff;
+            color: #000;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+        
+        /* Inputs */
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #000;
+        }
+        
+        .input-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #444;
+            display: block;
+            margin-bottom: 6px;
+        }
+        
+        .input-group {
+            margin-bottom: 14px;
+        }
+        
+        /* Data Row */
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #f5f5f5;
+            font-size: 13px;
+        }
+        
+        .data-row .label {
+            color: #888;
+        }
+        
+        .data-row .value {
+            font-weight: 600;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 0;
+            color: #aaa;
+        }
+        
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 16px 0;
+        }
+        
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: #eee;
+        }
+        
+        .divider-text {
+            font-size: 12px;
+            color: #bbb;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Scroll de categorías */
+        .cat-scroll {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 6px;
+            scrollbar-width: none;
+        }
+        
+        .cat-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .chip {
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid #e5e5e5;
+            background: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: inherit;
+            color: #555;
+        }
+        
+        .chip.active {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+        
+        /* Search */
+        .search-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            margin-bottom: 10px;
+            background: #fff;
+        }
+        
+        /* Tracking */
+        .tracking-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+        
+        .tracking-dot.done {
+            background: #000;
+            color: #fff;
+        }
+        
+        .tracking-dot.pending {
+            background: #f0f0f0;
+            color: #ccc;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .tracking-dot.active {
+            border: 2px solid #000;
+        }
+        
+        .tracking-line {
+            width: 1px;
+            min-height: 20px;
+            margin: 3px 0;
+        }
+        
+        .tracking-line.done {
+            background: #000;
+        }
+        
+        .tracking-line.pending {
+            background: #e5e5e5;
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div id="app">
+        <!-- Toast -->
+        <div id="toast" class="toast"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+        <!-- Header -->
+        <div id="header" class="header">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="logo">TH</div>
+                <div>
+                    <div class="logo-text">TUHORDER</div>
+                    <div id="headerSub" class="logo-sub hidden"></div>
+                </div>
+            </div>
+            <div>
+                <button id="btnLogout" class="btn-logout hidden" onclick="logout()">Salir</button>
+            </div>
+        </div>
 
-        // ── CONSTANTES ──
+        <!-- Content -->
+        <div id="content"></div>
+
+        <!-- Bottom Nav -->
+        <div id="bottomNav" class="bottom-nav hidden">
+            <button class="nav-btn" data-page="home" onclick="navigateTo('home')">
+                <span class="icon">🏠</span>
+                <span>Inicio</span>
+            </button>
+            <button class="nav-btn" data-page="catalog" onclick="navigateTo('catalog')">
+                <span class="icon">🛒</span>
+                <span>Ordenar</span>
+            </button>
+            <button class="nav-btn" data-page="orders" onclick="navigateTo('orders')">
+                <span class="icon">📦</span>
+                <span>Pedidos</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // DATA
+        // ============================================================
         const PRODUCTOS = [
-            { id: 1, nombre: "Bolsas Negras 200L", precio: 18500, icono: "🗑" },
-            { id: 2, nombre: "Bolsas Verdes 120L", precio: 14200, icono: "🗑" },
-            { id: 3, nombre: "Ariel Profesional 10kg", precio: 52000, icono: "🧴" },
-            { id: 4, nombre: "Fabuloso Multiusos 4L", precio: 28000, icono: "🧴" },
-            { id: 5, nombre: "Papel Scott 400m", precio: 8500, icono: "🧻" },
-            { id: 6, nombre: "Lysol Spray 750ml", precio: 68000, icono: "✨" },
+            { id: 1, nombre: "Bolsas Negras 200L", precio: 18500, icono: "🗑", categoria: "Bolsas" },
+            { id: 2, nombre: "Bolsas Verdes 120L", precio: 14200, icono: "🗑", categoria: "Bolsas" },
+            { id: 3, nombre: "Ariel Profesional 10kg", precio: 52000, icono: "🧴", categoria: "Detergentes" },
+            { id: 4, nombre: "Fabuloso Multiusos 4L", precio: 28000, icono: "🧴", categoria: "Detergentes" },
+            { id: 5, nombre: "Papel Scott 400m", precio: 8500, icono: "🧻", categoria: "Papel" },
+            { id: 6, nombre: "Papel Elite Jumbo", precio: 42000, icono: "🧻", categoria: "Papel" },
+            { id: 7, nombre: "Lysol Spray 750ml", precio: 68000, icono: "✨", categoria: "Desinfectantes" },
+            { id: 8, nombre: "Dettol 5L", precio: 38000, icono: "✨", categoria: "Desinfectantes" },
         ];
 
-        const formatear = (n) => {
-            return new Intl.NumberFormat("es-CO", { 
-                style: "currency", 
-                currency: "COP",
-                maximumFractionDigits: 0 
-            }).format(n);
+        const CATEGORIAS = ["Todos", "Bolsas", "Detergentes", "Papel", "Desinfectantes"];
+
+        const TIPOS_CLIENTE = ["Condominio", "Club", "Clínica", "Hotel", "Empresa", "Otro"];
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let state = {
+            pantalla: 'login',
+            clientes: [],
+            cliente: null,
+            carrito: [],
+            pedidos: [],
+            filtroCategoria: 'Todos',
+            busqueda: '',
+            pedidoSeleccionado: null,
         };
 
-        // ── COMPONENTE PRINCIPAL ──
-        function App() {
-            const [pantalla, setPantalla] = useState("login");
-            const [cliente, setCliente] = useState(null);
-            const [clientes, setClientes] = useState([]);
-            const [carrito, setCarrito] = useState([]);
-            const [mensaje, setMensaje] = useState(null);
-
-            // Mostrar mensaje temporal
-            const mostrarMensaje = (texto) => {
-                setMensaje(texto);
-                setTimeout(() => setMensaje(null), 3000);
-            };
-
-            // Agregar al carrito
-            const agregarAlCarrito = (producto) => {
-                const existe = carrito.find(item => item.id === producto.id);
-                if (existe) {
-                    setCarrito(carrito.map(item => 
-                        item.id === producto.id 
-                            ? { ...item, cantidad: item.cantidad + 1 }
-                            : item
-                    ));
-                } else {
-                    setCarrito([...carrito, { ...producto, cantidad: 1 }]);
-                }
-                mostrarMensaje(`${producto.nombre} agregado`);
-            };
-
-            // Cambiar cantidad
-            const cambiarCantidad = (id, delta) => {
-                setCarrito(carrito.map(item => 
-                    item.id === id 
-                        ? { ...item, cantidad: Math.max(1, item.cantidad + delta) }
-                        : item
-                ));
-            };
-
-            // Eliminar del carrito
-            const eliminarDelCarrito = (id) => {
-                setCarrito(carrito.filter(item => item.id !== id));
-            };
-
-            // Total del carrito
-            const totalCarrito = carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-            const cantidadItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
-
-            // Registrar cliente
-            const registrarCliente = (datos) => {
-                const nuevoCliente = {
-                    ...datos,
-                    id: "C-" + Date.now().toString().slice(-6)
-                };
-                setClientes([...clientes, nuevoCliente]);
-                setCliente(nuevoCliente);
-                setPantalla("home");
-                mostrarMensaje("Cliente registrado con éxito");
-            };
-
-            // Iniciar sesión
-            const iniciarSesion = (clienteSeleccionado) => {
-                setCliente(clienteSeleccionado);
-                setPantalla("home");
-                mostrarMensaje(`Bienvenido ${clienteSeleccionado.nombre}`);
-            };
-
-            // Cerrar sesión
-            const cerrarSesion = () => {
-                setCliente(null);
-                setCarrito([]);
-                setPantalla("login");
-            };
-
-            return (
-                <div style={{ padding: '16px', paddingBottom: '80px' }}>
-                    {/* Mensaje Toast */}
-                    {mensaje && (
-                        <div className="toast">{mensaje}</div>
-                    )}
-
-                    {/* Header */}
-                    <div style={{ 
-                        background: '#fff', 
-                        padding: '12px 16px', 
-                        borderRadius: '12px',
-                        marginBottom: '16px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ 
-                                background: '#000', 
-                                color: '#fff',
-                                width: '36px',
-                                height: '36px',
-                                borderRadius: '8px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontWeight: 'bold',
-                                fontSize: '14px'
-                            }}>TH</div>
-                            <div>
-                                <div style={{ fontWeight: 'bold', fontSize: '16px' }}>TUHORDER</div>
-                                {cliente && (
-                                    <div style={{ fontSize: '11px', color: '#999' }}>{cliente.nombre}</div>
-                                )}
-                            </div>
-                        </div>
-                        <div>
-                            {cliente && pantalla !== 'login' && (
-                                <button 
-                                    onClick={cerrarSesion}
-                                    style={{
-                                        background: 'none',
-                                        border: '1px solid #ddd',
-                                        padding: '6px 12px',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        fontSize: '12px'
-                                    }}
-                                >
-                                    Salir
-                                </button>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Contenido */}
-                    <div className="fade-in">
-                        {pantalla === 'login' && (
-                            <Login 
-                                clientes={clientes}
-                                onLogin={iniciarSesion}
-                                onRegister={() => setPantalla('register')}
-                            />
-                        )}
-
-                        {pantalla === 'register' && (
-                            <Register 
-                                onRegister={registrarCliente}
-                                onBack={() => setPantalla('login')}
-                            />
-                        )}
-
-                        {pantalla === 'home' && (
-                            <Home 
-                                cliente={cliente}
-                                onNewOrder={() => setPantalla('catalog')}
-                                onOrders={() => setPantalla('orders')}
-                            />
-                        )}
-
-                        {pantalla === 'catalog' && (
-                            <Catalog 
-                                productos={PRODUCTOS}
-                                carrito={carrito}
-                                onAdd={agregarAlCarrito}
-                                onChangeQty={cambiarCantidad}
-                                onRemove={eliminarDelCarrito}
-                                total={totalCarrito}
-                                cantidad={cantidadItems}
-                                onCart={() => setPantalla('cart')}
-                            />
-                        )}
-
-                        {pantalla === 'cart' && (
-                            <Cart 
-                                carrito={carrito}
-                                onChangeQty={cambiarCantidad}
-                                onRemove={eliminarDelCarrito}
-                                total={totalCarrito}
-                                onCheckout={() => setPantalla('checkout')}
-                                onBack={() => setPantalla('catalog')}
-                            />
-                        )}
-
-                        {pantalla === 'checkout' && (
-                            <Checkout 
-                                total={totalCarrito}
-                                onConfirm={() => {
-                                    setCarrito([]);
-                                    setPantalla('orders');
-                                    mostrarMensaje('¡Pedido confirmado!');
-                                }}
-                                onBack={() => setPantalla('cart')}
-                            />
-                        )}
-
-                        {pantalla === 'orders' && (
-                            <Orders />
-                        )}
-                    </div>
-
-                    {/* Bottom Navigation */}
-                    {cliente && pantalla !== 'login' && pantalla !== 'register' && (
-                        <div style={{
-                            position: 'fixed',
-                            bottom: 0,
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            width: '100%',
-                            maxWidth: '420px',
-                            background: '#fff',
-                            borderTop: '1px solid #eee',
-                            display: 'flex',
-                            padding: '8px 0',
-                            zIndex: 100
-                        }}>
-                            {[
-                                { key: 'home', label: 'Inicio', icon: '🏠' },
-                                { key: 'catalog', label: 'Ordenar', icon: '🛒' },
-                                { key: 'orders', label: 'Pedidos', icon: '📦' },
-                            ].map(tab => (
-                                <button
-                                    key={tab.key}
-                                    onClick={() => setPantalla(tab.key)}
-                                    style={{
-                                        flex: 1,
-                                        border: 'none',
-                                        background: 'none',
-                                        padding: '8px',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        gap: '2px',
-                                        cursor: 'pointer',
-                                        color: pantalla === tab.key ? '#000' : '#bbb',
-                                        fontWeight: pantalla === tab.key ? 'bold' : 'normal',
-                                        fontSize: '12px'
-                                    }}
-                                >
-                                    <span style={{ fontSize: '20px' }}>{tab.icon}</span>
-                                    <span>{tab.label}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            );
+        // ============================================================
+        // HELPERS
+        // ============================================================
+        function formatear(n) {
+            return new Intl.NumberFormat("es-CO", {
+                style: "currency",
+                currency: "COP",
+                maximumFractionDigits: 0
+            }).format(n);
         }
 
-        // ── LOGIN ──
-        function Login({ clientes, onLogin, onRegister }) {
-            const [seleccionado, setSeleccionado] = useState('');
-
-            return (
-                <div style={{ paddingTop: '20px' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                        <div style={{ 
-                            background: '#000', 
-                            color: '#fff',
-                            width: '64px',
-                            height: '64px',
-                            borderRadius: '16px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontWeight: 'bold',
-                            fontSize: '24px',
-                            margin: '0 auto 12px'
-                        }}>TH</div>
-                        <h1 style={{ fontSize: '24px', marginBottom: '4px' }}>TUHORDER</h1>
-                        <p style={{ color: '#666', fontSize: '14px' }}>Plataforma de suministros</p>
-                    </div>
-
-                    <div>
-                        <label style={{ fontSize: '13px', fontWeight: '600', color: '#444', display: 'block', marginBottom: '6px' }}>
-                            Selecciona tu cuenta
-                        </label>
-                        <select
-                            value={seleccionado}
-                            onChange={(e) => setSeleccionado(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                border: '1px solid #ddd',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                marginBottom: '12px'
-                            }}
-                        >
-                            <option value="">-- Elige un cliente --</option>
-                            {clientes.map(c => (
-                                <option key={c.id} value={c.id}>{c.nombre}</option>
-                            ))}
-                        </select>
-
-                        <button
-                            onClick={() => {
-                                const cliente = clientes.find(c => c.id === seleccionado);
-                                if (cliente) onLogin(cliente);
-                            }}
-                            disabled={!seleccionado}
-                            style={{
-                                width: '100%',
-                                padding: '14px',
-                                background: !seleccionado ? '#ddd' : '#000',
-                                color: '#fff',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontSize: '16px',
-                                fontWeight: '600',
-                                cursor: !seleccionado ? 'not-allowed' : 'pointer',
-                                marginBottom: '12px'
-                            }}
-                        >
-                            Ingresar
-                        </button>
-
-                        <div style={{ textAlign: 'center', margin: '16px 0', color: '#bbb' }}>o</div>
-
-                        <button
-                            onClick={onRegister}
-                            style={{
-                                width: '100%',
-                                padding: '14px',
-                                background: '#fff',
-                                color: '#000',
-                                border: '1px solid #ddd',
-                                borderRadius: '8px',
-                                fontSize: '16px',
-                                fontWeight: '600',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Registrar nuevo cliente
-                        </button>
-
-                        {clientes.length === 0 && (
-                            <div style={{ 
-                                textAlign: 'center', 
-                                marginTop: '20px', 
-                                color: '#aaa',
-                                fontSize: '13px',
-                                lineHeight: '1.6'
-                            }}>
-                                Aún no hay clientes registrados.<br />
-                                Crea el primero.
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
+        function formatearFecha(d) {
+            return new Date(d).toLocaleString("es-CO", {
+                dateStyle: "short",
+                timeStyle: "short"
+            });
         }
 
-        // ── REGISTER ──
-        function Register({ onRegister, onBack }) {
-            const [form, setForm] = useState({
-                nombre: '',
-                telefono: '',
-                email: '',
-                tipo: 'Condominio'
+        function generarId(prefix) {
+            return prefix + '-' + String(Date.now()).slice(-6);
+        }
+
+        function totalCarrito() {
+            return state.carrito.reduce((sum, i) => sum + i.precio * i.cantidad, 0);
+        }
+
+        function cantidadCarrito() {
+            return state.carrito.reduce((sum, i) => sum + i.cantidad, 0);
+        }
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        let toastTimeout;
+
+        function mostrarToast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => el.classList.remove('show'), 3000);
+        }
+
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        function navigateTo(page) {
+            state.pantalla = page;
+            render();
+        }
+
+        // ============================================================
+        // RENDER ENGINE
+        // ============================================================
+        function render() {
+            const content = document.getElementById('content');
+            const isLoggedIn = state.cliente !== null;
+            const showNav = isLoggedIn && state.pantalla !== 'login' && state.pantalla !== 'register';
+
+            // Header
+            document.getElementById('headerSub').textContent = isLoggedIn ? state.cliente.nombre : '';
+            document.getElementById('headerSub').classList.toggle('hidden', !isLoggedIn);
+            document.getElementById('btnLogout').classList.toggle('hidden', !isLoggedIn);
+
+            // Bottom Nav
+            const nav = document.getElementById('bottomNav');
+            nav.classList.toggle('hidden', !showNav);
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.page === state.pantalla);
             });
 
-            const handleSubmit = () => {
-                if (!form.nombre.trim() || !form.telefono.trim() || !form.email.trim()) {
-                    alert('Por favor completa todos los campos requeridos');
-                    return;
-                }
-                onRegister(form);
-            };
+            // Render page
+            switch (state.pantalla) {
+                case 'login': content.innerHTML = renderLogin(); break;
+                case 'register': content.innerHTML = renderRegister(); break;
+                case 'home': content.innerHTML = renderHome(); break;
+                case 'catalog': content.innerHTML = renderCatalog(); break;
+                case 'cart': content.innerHTML = renderCart(); break;
+                case 'checkout': content.innerHTML = renderCheckout(); break;
+                case 'orders': content.innerHTML = renderOrders(); break;
+                case 'tracking': content.innerHTML = renderTracking(); break;
+                default: content.innerHTML = '<p>Página no encontrada</p>';
+            }
+        }
 
-            return (
-                <div>
-                    <h2 style={{ fontSize: '20px', marginBottom: '8px' }}>Nuevo Cliente</h2>
-                    <p style={{ color: '#888', fontSize: '13px', marginBottom: '20px' }}>
+        // ============================================================
+        // LOGIN
+        // ============================================================
+        function renderLogin() {
+            let options = '<option value="">-- Elige un cliente --</option>';
+            state.clientes.forEach(c => {
+                options += `<option value="${c.id}">${c.nombre} (${c.tipo})</option>`;
+            });
+
+            return `
+                <div class="page">
+                    <div class="login-logo">TH</div>
+                    <div class="login-title">TUHORDER</div>
+                    <div class="login-sub">Plataforma de suministros</div>
+
+                    <div>
+                        <label class="input-label">Selecciona tu cuenta</label>
+                        <select id="loginSelect" class="input-field" style="margin-bottom:12px;">
+                            ${options}
+                        </select>
+
+                        <button class="btn-primary" onclick="handleLogin()">Ingresar</button>
+
+                        <div class="divider">
+                            <div class="divider-line"></div>
+                            <span class="divider-text">o</span>
+                            <div class="divider-line"></div>
+                        </div>
+
+                        <button class="btn-secondary" onclick="navigateTo('register')">Registrar nuevo cliente</button>
+
+                        ${state.clientes.length === 0 ? `
+                            <div style="text-align:center;margin-top:20px;color:#aaa;font-size:13px;line-height:1.8;">
+                                Aún no hay clientes registrados.<br/>Crea el primero.
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleLogin() {
+            const select = document.getElementById('loginSelect');
+            const id = select.value;
+            if (!id) return;
+            const cliente = state.clientes.find(c => c.id === id);
+            if (cliente) {
+                state.cliente = cliente;
+                navigateTo('home');
+                mostrarToast(`Bienvenido, ${cliente.nombre}`);
+            }
+        }
+
+        // ============================================================
+        // REGISTER
+        // ============================================================
+        function renderRegister() {
+            let tipoOptions = TIPOS_CLIENTE.map(t => `<option value="${t}">${t}</option>`).join('');
+
+            return `
+                <div class="page">
+                    <h2 style="font-size:20px;margin-bottom:8px;">Nuevo Cliente</h2>
+                    <p style="color:#888;font-size:13px;margin-bottom:20px;">
                         Completa los datos para registrarte
                     </p>
 
-                    <div style={{ marginBottom: '14px' }}>
-                        <label style={{ fontSize: '13px', fontWeight: '600', color: '#444', display: 'block', marginBottom: '6px' }}>
-                            Nombre / Razón Social *
-                        </label>
-                        <input
-                            value={form.nombre}
-                            onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-                            placeholder="Ej: Condominio Las Palmas"
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                border: '1px solid #ddd',
-                                borderRadius: '8px',
-                                fontSize: '14px'
-                            }}
-                        />
+                    <div class="input-group">
+                        <label class="input-label">Nombre / Razón Social *</label>
+                        <input id="regNombre" class="input-field" placeholder="Ej: Condominio Las Palmas" />
                     </div>
 
-                    <div style={{ marginBottom: '14px' }}>
-                        <label style={{ fontSize: '13px', fontWeight: '600', color: '#444', display: 'block', marginBottom: '6px' }}>
-                            Tipo de Cliente *
-                        </label>
-                        <select
-                            value={form.tipo}
-                            onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                border: '1px solid #ddd',
-                                borderRadius: '8px',
-                                fontSize: '14px'
-                            }}
-                        >
-                            {['Condominio', 'Club', 'Clínica', 'Hotel', 'Empresa', 'Otro'].map(t => (
-                                <option key={t}>{t}</option>
-                            ))}
-                        </select>
+                    <div class="input-group">
+                        <label class="input-label">Tipo de Cliente *</label>
+                        <select id="regTipo" class="input-field">${tipoOptions}</select>
                     </div>
 
-                    <div style={{ marginBottom: '14px' }}>
-                        <label style={{ fontSize: '13px', fontWeight: '600', color: '#444', display: 'block', marginBottom: '6px' }}>
-                            Teléfono / WhatsApp *
-                        </label>
-                        <input
-                            value={form.telefono}
-                            onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-                            placeholder="+58 414 000 0000"
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                border: '1px solid #ddd',
-                                borderRadius: '8px',
-                                fontSize: '14px'
-                            }}
-                        />
+                    <div class="input-group">
+                        <label class="input-label">Teléfono / WhatsApp *</label>
+                        <input id="regTelefono" class="input-field" placeholder="+58 414 000 0000" />
                     </div>
 
-                    <div style={{ marginBottom: '20px' }}>
-                        <label style={{ fontSize: '13px', fontWeight: '600', color: '#444', display: 'block', marginBottom: '6px' }}>
-                            Correo electrónico *
-                        </label>
-                        <input
-                            value={form.email}
-                            onChange={(e) => setForm({ ...form, email: e.target.value })}
-                            placeholder="correo@empresa.com"
-                            type="email"
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                border: '1px solid #ddd',
-                                borderRadius: '8px',
-                                fontSize: '14px'
-                            }}
-                        />
+                    <div class="input-group">
+                        <label class="input-label">Correo electrónico *</label>
+                        <input id="regEmail" class="input-field" type="email" placeholder="correo@empresa.com" />
                     </div>
 
-                    <button
-                        onClick={handleSubmit}
-                        style={{
-                            width: '100%',
-                            padding: '14px',
-                            background: '#000',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontSize: '16px',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            marginBottom: '10px'
-                        }}
-                    >
-                        Registrar →
-                    </button>
-
-                    <button
-                        onClick={onBack}
-                        style={{
-                            width: '100%',
-                            padding: '14px',
-                            background: '#fff',
-                            color: '#000',
-                            border: '1px solid #ddd',
-                            borderRadius: '8px',
-                            fontSize: '16px',
-                            fontWeight: '600',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Volver
-                    </button>
+                    <button class="btn-primary" onclick="handleRegister()">Registrar →</button>
+                    <button class="btn-secondary" onclick="navigateTo('login')">Volver</button>
                 </div>
-            );
+            `;
         }
 
-        // ── HOME ──
-        function Home({ cliente, onNewOrder, onOrders }) {
-            return (
-                <div>
-                    <div style={{
-                        background: '#000',
-                        borderRadius: '16px',
-                        padding: '20px',
-                        color: '#fff',
-                        marginBottom: '16px'
-                    }}>
-                        <div style={{ fontSize: '11px', color: '#999', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>
-                            {cliente?.tipo || 'Cliente'}
-                        </div>
-                        <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{cliente?.nombre}</div>
-                        <div style={{ fontSize: '11px', color: '#999', marginTop: '4px' }}>ID {cliente?.id}</div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+        function handleRegister() {
+            const nombre = document.getElementById('regNombre').value.trim();
+            const tipo = document.getElementById('regTipo').value;
+            const telefono = document.getElementById('regTelefono').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+
+            if (!nombre || !telefono || !email) {
+                mostrarToast('Por favor completa todos los campos requeridos');
+                return;
+            }
+
+            const nuevo = {
+                id: generarId('C'),
+                nombre,
+                tipo,
+                telefono,
+                email,
+                createdAt: new Date().toISOString()
+            };
+
+            state.clientes.push(nuevo);
+            state.cliente = nuevo;
+            mostrarToast('Cliente registrado con éxito');
+            navigateTo('home');
+        }
+
+        // ============================================================
+        // HOME
+        // ============================================================
+        function renderHome() {
+            const c = state.cliente;
+            if (!c) return '<p>No hay cliente</p>';
+
+            const pedidosActivos = state.pedidos.filter(p => p.estado !== 'entregado').length;
+
+            return `
+                <div class="page">
+                    <div class="hero">
+                        <div class="hero-type">${c.tipo || 'Cliente'}</div>
+                        <div class="hero-name">${c.nombre}</div>
+                        <div class="hero-id">ID ${c.id}</div>
+                        <div class="hero-stats">
                             <div>
-                                <div style={{ fontSize: '10px', color: '#888' }}>Pedidos activos</div>
-                                <div style={{ fontSize: '28px', fontWeight: '900' }}>0</div>
+                                <div class="hero-stat-label">Pedidos activos</div>
+                                <div class="hero-stat-value">${pedidosActivos}</div>
                             </div>
-                            <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontSize: '10px', color: '#888' }}>Total pedidos</div>
-                                <div style={{ fontSize: '28px', fontWeight: '900' }}>0</div>
+                            <div style="text-align:right;">
+                                <div class="hero-stat-label">Total pedidos</div>
+                                <div class="hero-stat-value">${state.pedidos.length}</div>
                             </div>
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
-                        <button
-                            onClick={onNewOrder}
-                            style={{
-                                background: '#fff',
-                                border: '1px solid #eee',
-                                borderRadius: '12px',
-                                padding: '20px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                gap: '6px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <span style={{ fontSize: '28px' }}>🛒</span>
-                            <span style={{ fontWeight: '600', fontSize: '13px' }}>Nueva Orden</span>
+                    <div class="quick-grid">
+                        <button class="quick-btn" onclick="navigateTo('catalog')">
+                            <span class="icon">🛒</span>
+                            <span class="label">Nueva Orden</span>
                         </button>
-
-                        <button
-                            onClick={onOrders}
-                            style={{
-                                background: '#fff',
-                                border: '1px solid #eee',
-                                borderRadius: '12px',
-                                padding: '20px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                gap: '6px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <span style={{ fontSize: '28px' }}>📦</span>
-                            <span style={{ fontWeight: '600', fontSize: '13px' }}>Mis Pedidos</span>
+                        <button class="quick-btn" onclick="navigateTo('orders')">
+                            <span class="icon">📦</span>
+                            <span class="label">Mis Pedidos</span>
                         </button>
                     </div>
 
-                    <div style={{
-                        background: '#fff',
-                        borderRadius: '12px',
-                        padding: '16px',
-                        border: '1px solid #eee'
-                    }}>
-                        <div style={{ fontSize: '10px', fontWeight: '700', color: '#bbb', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>
-                            Categorías disponibles
-                        </div>
-                        {['Bolsas de Basura', 'Detergentes', 'Papel Higiénico', 'Desinfectantes'].map(cat => (
-                            <div
-                                key={cat}
-                                onClick={onNewOrder}
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    padding: '10px 0',
-                                    borderBottom: '1px solid #f5f5f5',
-                                    cursor: 'pointer',
-                                    fontSize: '13px'
-                                }}
-                            >
-                                <span>{cat}</span>
-                                <span style={{ color: '#ccc' }}>›</span>
+                    <div class="card">
+                        <div class="card-label">Categorías disponibles</div>
+                        ${CATEGORIAS.filter(c => c !== 'Todos').map(cat => `
+                            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5;cursor:pointer;font-size:13px;" 
+                                 onclick="navigateTo('catalog')">
+                                <span>${cat}</span>
+                                <span style="color:#ccc;">›</span>
                             </div>
-                        ))}
+                        `).join('')}
                     </div>
                 </div>
-            );
+            `;
         }
 
-        // ── CATALOG ──
-        function Catalog({ productos, carrito, onAdd, onChangeQty, onRemove, total, cantidad, onCart }) {
-            return (
-                <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                        <h2 style={{ fontSize: '20px' }}>Catálogo</h2>
-                        {cantidad > 0 && (
-                            <button
-                                onClick={onCart}
-                                style={{
-                                    background: '#000',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: '20px',
-                                    padding: '8px 16px',
-                                    fontSize: '13px',
-                                    fontWeight: '600',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                🛒 {cantidad} items
+        // ============================================================
+        // CATALOG
+        // ============================================================
+        function renderCatalog() {
+            const filtered = PRODUCTOS.filter(p => {
+                const matchCat = state.filtroCategoria === 'Todos' || p.categoria === state.filtroCategoria;
+                const matchSearch = p.nombre.toLowerCase().includes(state.busqueda.toLowerCase());
+                return matchCat && matchSearch;
+            });
+
+            let productosHTML = filtered.map(p => {
+                const inCart = state.carrito.find(i => i.id === p.id);
+                return `
+                    <div class="product-row">
+                        <div class="product-icon">${p.icono}</div>
+                        <div class="product-info">
+                            <div class="product-name">${p.nombre}</div>
+                            <div class="product-price">${formatear(p.precio)}</div>
+                        </div>
+                        ${inCart ? `
+                            <div class="qty-control">
+                                <button class="qty-btn" onclick="changeQty(${p.id}, -1)">−</button>
+                                <span class="qty-value">${inCart.cantidad}</span>
+                                <button class="qty-btn" onclick="changeQty(${p.id}, 1)">+</button>
+                            </div>
+                        ` : `
+                            <button class="add-btn" onclick="addToCart(${p.id})">+</button>
+                        `}
+                    </div>
+                `;
+            }).join('');
+
+            const chips = CATEGORIAS.map(c => `
+                <button class="chip ${state.filtroCategoria === c ? 'active' : ''}" 
+                        onclick="setFilter('${c}')">${c}</button>
+            `).join('');
+
+            const total = totalCarrito();
+            const cantidad = cantidadCarrito();
+
+            return `
+                <div class="page">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h2 style="font-size:20px;">Catálogo</h2>
+                        ${cantidad > 0 ? `
+                            <button class="btn-primary" style="width:auto;padding:8px 16px;font-size:13px;margin:0;" 
+                                    onclick="navigateTo('cart')">
+                                🛒 ${cantidad} items
                             </button>
-                        )}
+                        ` : ''}
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {productos.map(p => {
-                            const enCarrito = carrito.find(item => item.id === p.id);
-                            return (
-                                <div
-                                    key={p.id}
-                                    style={{
-                                        background: '#fff',
-                                        borderRadius: '12px',
-                                        padding: '14px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '12px',
-                                        border: '1px solid #eee'
-                                    }}
-                                >
-                                    <div style={{
-                                        width: '44px',
-                                        height: '44px',
-                                        background: '#f5f5f5',
-                                        borderRadius: '10px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '24px'
-                                    }}>
-                                        {p.icono}
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ fontWeight: '600', fontSize: '14px' }}>{p.nombre}</div>
-                                        <div style={{ fontWeight: '700', fontSize: '15px', marginTop: '2px' }}>
-                                            {formatear(p.precio)}
-                                        </div>
-                                    </div>
-                                    {enCarrito ? (
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <button
-                                                onClick={() => onChangeQty(p.id, -1)}
-                                                style={{
-                                                    width: '30px',
-                                                    height: '30px',
-                                                    borderRadius: '8px',
-                                                    border: '1px solid #ddd',
-                                                    background: '#f5f5f5',
-                                                    fontSize: '18px',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                −
-                                            </button>
-                                            <span style={{ fontWeight: 'bold', fontSize: '14px', minWidth: '20px', textAlign: 'center' }}>
-                                                {enCarrito.cantidad}
-                                            </span>
-                                            <button
-                                                onClick={() => onChangeQty(p.id, 1)}
-                                                style={{
-                                                    width: '30px',
-                                                    height: '30px',
-                                                    borderRadius: '8px',
-                                                    border: '1px solid #ddd',
-                                                    background: '#f5f5f5',
-                                                    fontSize: '18px',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                +
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <button
-                                            onClick={() => onAdd(p)}
-                                            style={{
-                                                width: '34px',
-                                                height: '34px',
-                                                borderRadius: '8px',
-                                                border: 'none',
-                                                background: '#000',
-                                                color: '#fff',
-                                                fontSize: '22px',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center'
-                                            }}
-                                        >
-                                            +
-                                        </button>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
+                    <input class="search-input" placeholder="Buscar producto..." 
+                           value="${state.busqueda}" oninput="setSearch(this.value)" />
 
-                    {cantidad > 0 && (
-                        <div
-                            onClick={onCart}
-                            style={{
-                                position: 'sticky',
-                                bottom: '12px',
-                                marginTop: '16px',
-                                background: '#000',
-                                color: '#fff',
-                                borderRadius: '12px',
-                                padding: '16px',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                cursor: 'pointer',
-                                fontWeight: '600'
-                            }}
-                        >
-                            <span>Ver carrito ({cantidad})</span>
-                            <span>{formatear(total)} →</span>
+                    <div class="cat-scroll">${chips}</div>
+
+                    ${productosHTML || '<p style="text-align:center;color:#aaa;padding:20px;">No hay productos</p>'}
+
+                    ${cantidad > 0 ? `
+                        <div class="float-bar" onclick="navigateTo('cart')">
+                            <span>Ver carrito (${cantidad})</span>
+                            <span>${formatear(total)} →</span>
                         </div>
-                    )}
+                    ` : ''}
                 </div>
-            );
+            `;
         }
 
-        // ── CART ──
-        function Cart({ carrito, onChangeQty, onRemove, total, onCheckout, onBack }) {
-            if (carrito.length === 0) {
-                return (
-                    <div>
-                        <h2 style={{ fontSize: '20px', marginBottom: '16px' }}>Carrito</h2>
-                        <div style={{ textAlign: 'center', padding: '40px 0', color: '#aaa' }}>
-                            <div style={{ fontSize: '48px', marginBottom: '12px' }}>🛒</div>
+        // ============================================================
+        // CART
+        // ============================================================
+        function renderCart() {
+            if (state.carrito.length === 0) {
+                return `
+                    <div class="page">
+                        <h2 style="font-size:20px;margin-bottom:16px;">Carrito</h2>
+                        <div class="empty-state">
+                            <div class="icon">🛒</div>
                             <p>El carrito está vacío</p>
-                            <button
-                                onClick={onBack}
-                                style={{
-                                    marginTop: '16px',
-                                    padding: '12px 24px',
-                                    background: '#000',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer'
-                                }}
-                            >
+                            <button class="btn-primary" style="margin-top:16px;" onclick="navigateTo('catalog')">
                                 Ver productos
                             </button>
                         </div>
                     </div>
-                );
+                `;
             }
 
-            return (
-                <div>
-                    <h2 style={{ fontSize: '20px', marginBottom: '16px' }}>Carrito</h2>
-                    
-                    {carrito.map(item => (
-                        <div
-                            key={item.id}
-                            style={{
-                                background: '#fff',
-                                borderRadius: '12px',
-                                padding: '14px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '12px',
-                                marginBottom: '8px',
-                                border: '1px solid #eee'
-                            }}
-                        >
-                            <span style={{ fontSize: '24px' }}>{item.icono}</span>
-                            <div style={{ flex: 1 }}>
-                                <div style={{ fontWeight: '600', fontSize: '14px' }}>{item.nombre}</div>
-                                <div style={{ fontSize: '13px', color: '#888' }}>{formatear(item.precio)}</div>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <button
-                                    onClick={() => onChangeQty(item.id, -1)}
-                                    style={{
-                                        width: '30px',
-                                        height: '30px',
-                                        borderRadius: '8px',
-                                        border: '1px solid #ddd',
-                                        background: '#f5f5f5',
-                                        fontSize: '18px',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    −
-                                </button>
-                                <span style={{ fontWeight: 'bold', fontSize: '14px', minWidth: '20px', textAlign: 'center' }}>
-                                    {item.cantidad}
-                                </span>
-                                <button
-                                    onClick={() => onChangeQty(item.id, 1)}
-                                    style={{
-                                        width: '30px',
-                                        height: '30px',
-                                        borderRadius: '8px',
-                                        border: '1px solid #ddd',
-                                        background: '#f5f5f5',
-                                        fontSize: '18px',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    +
-                                </button>
-                            </div>
-                            <button
-                                onClick={() => onRemove(item.id)}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: '#ccc',
-                                    fontSize: '18px',
-                                    cursor: 'pointer',
-                                    padding: '0 4px'
-                                }}
-                            >
-                                ✕
-                            </button>
-                        </div>
-                    ))}
-
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        padding: '16px 0',
-                        fontSize: '16px',
-                        fontWeight: 'bold'
-                    }}>
-                        <span>Total</span>
-                        <span>{formatear(total)}</span>
+            let itemsHTML = state.carrito.map(item => `
+                <div class="product-row">
+                    <span style="font-size:24px;">${item.icono}</span>
+                    <div class="product-info">
+                        <div class="product-name">${item.nombre}</div>
+                        <div style="font-size:13px;color:#888;">${formatear(item.precio)}</div>
                     </div>
-
-                    <button
-                        onClick={onCheckout}
-                        style={{
-                            width: '100%',
-                            padding: '14px',
-                            background: '#000',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontSize: '16px',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            marginBottom: '10px'
-                        }}
-                    >
-                        Continuar al pago →
-                    </button>
-
-                    <button
-                        onClick={onBack}
-                        style={{
-                            width: '100%',
-                            padding: '14px',
-                            background: '#fff',
-                            color: '#000',
-                            border: '1px solid #ddd',
-                            borderRadius: '8px',
-                            fontSize: '16px',
-                            fontWeight: '600',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Volver
-                    </button>
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+                        <span class="qty-value">${item.cantidad}</span>
+                        <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+                    </div>
+                    <button style="background:none;border:none;color:#ccc;font-size:18px;cursor:pointer;padding:0 4px;" 
+                            onclick="removeFromCart(${item.id})">✕</button>
                 </div>
-            );
+            `).join('');
+
+            const total = totalCarrito();
+
+            return `
+                <div class="page">
+                    <h2 style="font-size:20px;margin-bottom:16px;">Carrito</h2>
+                    ${itemsHTML}
+                    <div style="display:flex;justify-content:space-between;padding:16px 0;font-size:16px;font-weight:bold;">
+                        <span>Total</span>
+                        <span>${formatear(total)}</span>
+                    </div>
+                    <button class="btn-primary" onclick="navigateTo('checkout')">Continuar al pago →</button>
+                    <button class="btn-secondary" onclick="navigateTo('catalog')">Volver</button>
+                </div>
+            `;
         }
 
-        // ── CHECKOUT ──
-        function Checkout({ total, onConfirm, onBack }) {
+        // ============================================================
+        // CHECKOUT
+        // ============================================================
+        function renderCheckout() {
+            const total = totalCarrito();
             const iva = total * 0.16;
             const totalConIva = total * 1.16;
 
-            return (
-                <div>
-                    <h2 style={{ fontSize: '20px', marginBottom: '8px' }}>Confirmación de Pago</h2>
-                    <p style={{ color: '#888', fontSize: '13px', marginBottom: '20px' }}>
+            return `
+                <div class="page">
+                    <h2 style="font-size:20px;margin-bottom:8px;">Confirmación de Pago</h2>
+                    <p style="color:#888;font-size:13px;margin-bottom:20px;">
                         Revisa los detalles de tu pedido
                     </p>
 
-                    <div style={{
-                        background: '#fff',
-                        borderRadius: '12px',
-                        padding: '16px',
-                        border: '1px solid #eee',
-                        marginBottom: '12px'
-                    }}>
-                        <div style={{ fontSize: '10px', fontWeight: '700', color: '#bbb', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>
-                            Transferencia bancaria
-                        </div>
-                        {[
+                    <div class="card">
+                        <div class="card-label">Transferencia bancaria</div>
+                        ${[
                             ['Banco', 'Bancolombia'],
                             ['Tipo', 'Cuenta Corriente'],
                             ['Número', '069-123456-78'],
                             ['NIT', '900.123.456-7'],
                             ['Titular', 'TUHORDER S.A.S']
-                        ].map(([k, v]) => (
-                            <div key={k} style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                padding: '6px 0',
-                                borderBottom: '1px solid #f5f5f5',
-                                fontSize: '13px'
-                            }}>
-                                <span style={{ color: '#888' }}>{k}</span>
-                                <span style={{ fontWeight: '600' }}>{v}</span>
+                        ].map(([k, v]) => `
+                            <div class="data-row">
+                                <span class="label">${k}</span>
+                                <span class="value">${v}</span>
                             </div>
-                        ))}
+                        `).join('')}
                     </div>
 
-                    <div style={{
-                        background: '#fff',
-                        borderRadius: '12px',
-                        padding: '16px',
-                        border: '1px solid #eee',
-                        marginBottom: '16px'
-                    }}>
-                        <div style={{ fontSize: '10px', fontWeight: '700', color: '#bbb', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>
-                            Resumen
+                    <div class="card">
+                        <div class="card-label">Resumen</div>
+                        <div class="data-row">
+                            <span class="label">Subtotal</span>
+                            <span>${formatear(total)}</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #f5f5f5', fontSize: '13px' }}>
-                            <span style={{ color: '#888' }}>Subtotal</span>
-                            <span>{formatear(total)}</span>
+                        <div class="data-row">
+                            <span class="label">IVA 16%</span>
+                            <span>${formatear(iva)}</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #f5f5f5', fontSize: '13px' }}>
-                            <span style={{ color: '#888' }}>IVA 16%</span>
-                            <span>{formatear(iva)}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0 0', marginTop: '6px', borderTop: '1px solid #eee', fontSize: '15px', fontWeight: 'bold' }}>
+                        <div style="display:flex;justify-content:space-between;padding:10px 0 0;margin-top:6px;border-top:1px solid #eee;font-size:15px;font-weight:bold;">
                             <span>Total a pagar</span>
-                            <span>{formatear(totalConIva)}</span>
+                            <span>${formatear(totalConIva)}</span>
                         </div>
                     </div>
 
-                    <button
-                        onClick={onConfirm}
-                        style={{
-                            width: '100%',
-                            padding: '14px',
-                            background: '#000',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontSize: '16px',
-                            fontWeight: '600',
-                           
+                    <button class="btn-primary" onclick="confirmOrder()">Confirmar pedido ✓</button>
+                    <button class="btn-secondary" onclick="navigateTo('cart')">Volver</button>
+                </div>
+            `;
+        }
+
+        // ============================================================
+        // ORDERS
+        // ============================================================
+        function renderOrders() {
+            if (state.pedidos.length === 0) {
+                return `
+                    <div class="page">
+                        <h2 style="font-size:20px;margin-bottom:16px;">Mis Pedidos</h2>
+                        <div class="empty-state">
+                            <div class="icon">📦</div>
+                            <p>No tienes pedidos aún</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            let ordersHTML = state.pedidos.map(p => {
+                const estadoMap = {
+                    'pendiente': 'Pendiente',
+                    'aprobado': 'Aprobado',
+                    'preparando': 'Preparando',
+                    'camino': 'En Camino',
+                    'entregado': 'Entregado'
+                };
+                const estadoLabel = estadoMap[p.estado] || p.estado;
+                const isActive = ['aprobado', 'preparando', 'camino'].includes(p.estado);
+
+                return `
+                    <div class="card" style="cursor:pointer;" onclick="viewTracking('${p.id}')">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                            <div>
+                                <div style="font-weight:700;font-size:14px;">${p.id}</div>
+                                <div style="font-size:11px;color:#888;margin-top:2px;">${formatearFecha(p.createdAt)}</div>
+                            </div>
+                            <span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;
+                                         background:${p.estado === 'entregado' ? '#000' : isActive ? '#000' : '#f0f0f0'};
+                                         color:${p.estado === 'entregado' ? '#fff' : isActive ? '#fff' : '#888'};
+                                         border:1px solid ${isActive || p.estado === 'entregado' ? '#000' : '#e5e5e5'};">
+                                ${estadoLabel}
+                            </span>
+                        </div>
+                        <div style="font-size:12px;color:#555;margin-top:8px;">
+                            ${p.items.map(i => `${i.icono} ${i.nombre} ×${i.cantidad}`).join(' · ')}
+                        </div>
+                        <div style="display:flex;justify-content:space-between;margin-top:8px;">
+                            <span style="font-size:12px;color:#888;">${p.items.length} productos</span>
+                            <span style="font-weight:700;font-size:13px;">${formatear(p.total * 1.16)}</span>
+                        </div>
+                        <div style="font-size:12px;color:#000;font-weight:600;margin-top:10px;cursor:pointer;">
+                            Ver tracking →
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="page">
+                    <h2 style="font-size:20px;margin-bottom:16px;">Mis Pedidos</h2>
+                    ${ordersHTML}
+                </div>
+            `;
+        }
+
+        // ============================================================
+        // TRACKING
+        // ============================================================
+        function renderTracking() {
+            const pedido = state.pedidos.find(p => p.id === state.pedidoSeleccionado);
+            if (!pedido) {
+                return `
+                    <div class="page">
+                        <h2 style="font-size:20px;margin-bottom:16px;">Tracking</h2>
+                        <div class="empty-state">
+                            <p>Pedido no encontrado</p>
+                            <button class="btn-primary" style="margin-top:16px;" onclick="navigateTo('orders')">
+                                Ver pedidos
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const estados = ['pendiente', 'aprobado', 'preparando', 'camino', 'entregado'];
+            const labels = ['Orden Creada', 'Aprobada', 'Preparando', 'En Camino', 'Entregado'];
+            const icons = ['○', '✓', '○', '→', '✓'];
+            const idx = estados.indexOf(pedido.estado);
+
+            let trackingHTML = estados.map((e, i) => {
+                const done = i <= idx;
+                const active = i === idx;
+                return `
+                    <div style="display:flex;align-items:flex-start;">
+                        <div style="display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0;">
+                            <div class="tracking-dot ${done ? 'done' : 'pending'} ${active ? 'active' : ''}">
+                                ${icons[i]}
+                            </div>
+                            ${i < estados.length - 1 ? `
+                                <div class="tracking-line ${done ? 'done' : 'pending'}" style="width:1px;min-height:20px;margin:3px 0;"></div>
+                            ` : ''}
+                        </div>
+                        <div style="padding-left:12px;padding-bottom:${i < estados.length - 1 ? '18' : '0'}px;padding-top:4px;">
+                            <div style="font-size:13px;font-weight:${done ? '700' : '400'};color:${done ? '#000' : '#bbb'};">${labels[i]}</div>
+                            <div style="font-size:10px;color:#aaa;margin-top:2px;">
+                                ${done && i < idx ? 'Completado' : i === idx ? 'En proceso' : 'Pendiente'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="page">
+                    <h2 style="font-size:20px;margin-bottom:16px;">Tracking · ${pedido.id}</h2>
+                    
+                    <div class="card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                            <span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;
+                                         background:${pedido.estado === 'entregado' ? '#000' : '#000'};
+                                         color:#fff;border:1px solid #000;">
+                                ${labels[idx]}
+                            </span>
+                            <span style="font-size:12px;color:#888;">${formatear(pedido.total * 1.16)}</span>
+                        </div>
+                        <div style="font-size:12px;color:#555;">
+                            ${pedido.items.map(i => `${i.icono} ${i.nombre} ×${i.cantidad}`).join(', ')}
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        ${trackingHTML}
+                    </div>
+
+                    ${pedido.estado === 'camino' ? `
+                        <div class="card" style="text-align:center;padding:20px 14px;">
+                            <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#888;">En camino</div>
+                            <div style="font-size:28px;margin:10px 0;">→</div>
+                            <div style="font-size:13px;font-weight:600;">Llegada estimada: 45 min</div>
+                            <div style="font-size:11px;color:#888;margin-top:3px;">Transporte #TH-V021</div>
+                            <div style="display:inline-block;background:#000;color:#fff;border-radius:20px;padding:3px 12px;font-size:10px;font-weight:700;margin-top:10px;">● EN VIVO</div>
+                        </div>
+                    ` : ''}
+
+                    ${pedido.estado === 'entregado' ? `
+                        <div class="card" style="text-align:center;padding:20px 14px;border:1px solid #000;">
+                            <div style="font-size:36px;">✓</div>
+                            <div style="font-weight:800;font-size:15px;margin-top:8px;">Pedido entregado</div>
+                            <div style="font-size:12px;color:#666;margin-top:4px;">Recibido satisfactoriamente. Gracias por usar TUHORDER.</div>
+                        </div>
+                    ` : ''}
+
+                    <button class="btn-secondary" onclick="navigateTo('orders')">Volver a pedidos</button>
+                </div>
+            `;
+        }
+
+        // ============================================================
+        // ACTIONS
+        // ============================================================
+        function addToCart(id) {
+            const producto = PRODUCTOS.find(p => p.id === id);
+            if (!producto) return;
+            const existente = state.carrito.find(i => i.id === id);
+            if (existente) {
+                existente.cantidad++;
+            } else {
+                state.carrito.push({ ...producto, cantidad: 1 });
+            }
+            render();
+            mostrarToast(`${producto.nombre} agregado`);
+        }
+
+        function changeQty(id, delta) {
+            const item = state.carrito.find(i => i.id === id);
+            if (!item) return;
+            item.cantidad = Math.max(1, item.cantidad + delta);
+            render();
+        }
+
+        function removeFromCart(id) {
+            state.carrito = state.carrito.filter(i => i.id !== id);
+            render();
+        }
+
+        function setFilter(cat) {
+            state.filtroCategoria = cat;
+            render();
+        }
+
+        function setSearch(val) {
+            state.busqueda = val;
+            render();
+        }
+
+        function confirmOrder() {
+            if (state.carrito.length === 0) return;
+
+            const pedido = {
+                id: generarId('TH'),
+                items: [...state.carrito],
+                total: totalCarrito(),
+                estado: 'pendiente',
+                createdAt: new Date().toISOString(),
+                clienteId: state.cliente.id,
+                clienteNombre: state.cliente.nombre,
+            };
+
+            state.pedidos.unshift(pedido);
+            state.carrito = [];
+            state.pedidoSeleccionado = pedido.id;
+
+            // Simular progreso
+            const estados = ['aprobado', 'preparando', 'camino', 'entregado'];
+            let i = 0;
+            const avanzar = () => {
+                if (i >= estados.length) return;
+                setTimeout(() => {
+                    const p = state.pedidos.find(p => p.id === pedido.id);
+                    if (p) {
+                        p.estado = estados[i];
+                        render();
+                        const labels = ['Aprobado', 'Preparando', 'En Camino', 'Entregado'];
+                        mostrarToast(`Pedido ${labels[i]}`);
+                        if (i < estados.length - 1) avanzar();
+                    }
+                }, 3000);
+                i++;
+            };
+
+            mostrarToast(`Pedido ${pedido.id} confirmado`);
+            navigateTo('orders');
+            setTimeout(avanzar, 1000);
+        }
+
+        function viewTracking(id) {
+            state.pedidoSeleccionado = id;
+            navigateTo('tracking');
+        }
+
+        function logout() {
+            state.cliente = null;
+            state.carrito = [];
+            navigateTo('login');
+            mostrarToast('Sesión cerrada');
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        // Cliente de demostración
+        state.clientes.push({
+            id: 'C-123456',
+            nombre: 'Condominio Las Palmas',
+            tipo: 'Condominio',
+            telefono: '+58 414 000 0000',
+            email: 'contacto@laspalmas.com'
+        });
+
+        // Pedido de ejemplo
+        state.pedidos.push({
+            id: 'TH-789012',
+            items: [
+                { id: 1, nombre: 'Bolsas Negras 200L', precio: 18500, icono: '🗑', cantidad: 2 },
+                { id: 5, nombre: 'Papel Scott 400m', precio: 8500, icono: '🧻', cantidad: 1 },
+            ],
+            total: 45500,
+            estado: 'camino',
+            createdAt: new Date(Date.now() - 3600000).toISOString(),
+            clienteId: 'C-123456',
+            clienteNombre: 'Condominio Las Palmas'
+        });
+
+        render();
+    </script>
+</body>
+</html>
