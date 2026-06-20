@@ -3,68 +3,47 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TUHORDER - Plataforma de suministros</title>
-    <!-- Usamos React y ReactDOM desde CDN -->
+    <title>TUHORDER</title>
+    
+    <!-- React desde CDN -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel para JSX en el navegador -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <style>
-        /* Reset y estilos base */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f5;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
             min-height: 100vh;
         }
-
         #root {
             width: 100%;
             max-width: 420px;
             min-height: 100vh;
             background: #f5f5f5;
-            position: relative;
         }
-
-        /* Estilos para scroll suave */
-        ::-webkit-scrollbar {
-            width: 4px;
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            z-index: 999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        ::-webkit-scrollbar-track {
-            background: #f0f0f0;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 4px;
-        }
-
-        /* Animaciones */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
         .fade-in {
             animation: fadeIn 0.3s ease-out;
         }
-
-        /* Estilos para el toast */
-        .toast-enter {
-            animation: slideDown 0.4s ease-out;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translate(-50%, -20px); }
-            to { opacity: 1; transform: translate(-50%, 0); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -72,778 +51,977 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useRef, useEffect, useCallback, useMemo } = React;
+        const { useState, useEffect } = React;
 
-        // ── CONSTANTS ─────────────────────────────────────────────────────────────────
-        const WA_NUMBER = "584141117983";
-
-        const PRODUCTS = [
-          { id: 1, cat: "Bolsas de Basura",  name: "Bolsas Negras 200L",    unit: "paq 50 und",      price: 18500, icon: "🗑", stock: 120 },
-          { id: 2, cat: "Bolsas de Basura",  name: "Bolsas Verdes 120L",    unit: "paq 50 und",      price: 14200, icon: "🗑", stock: 85  },
-          { id: 3, cat: "Bolsas de Basura",  name: "Bolsas Rojas 80L",      unit: "paq 100 und",     price: 16800, icon: "🗑", stock: 200 },
-          { id: 4, cat: "Detergentes",       name: "Ariel Profesional 10kg",unit: "bolsa",            price: 52000, icon: "🧴", stock: 45  },
-          { id: 5, cat: "Detergentes",       name: "Fabuloso Multiusos 4L", unit: "garrafa",          price: 28000, icon: "🧴", stock: 70  },
-          { id: 6, cat: "Detergentes",       name: "Hipoclorito 10%",       unit: "garrafa 5L",       price: 12000, icon: "🧪", stock: 150 },
-          { id: 7, cat: "Papel Higiénico",   name: "Papel Scott 400m",      unit: "rollo industrial", price: 8500,  icon: "🧻", stock: 300 },
-          { id: 8, cat: "Papel Higiénico",   name: "Papel Elite Jumbo",     unit: "caja x12",         price: 42000, icon: "🧻", stock: 60  },
-          { id: 9, cat: "Papel Higiénico",   name: "Toallas de Mano Z",     unit: "caja x5000",       price: 35000, icon: "🤲", stock: 40  },
-          { id: 10,cat: "Desinfectantes",    name: "Lysol Spray 750ml",     unit: "caja x12",         price: 68000, icon: "✨", stock: 30  },
-          { id: 11,cat: "Desinfectantes",    name: "Dettol 5L",             unit: "garrafa",          price: 38000, icon: "✨", stock: 55  },
+        // ── CONSTANTES ──
+        const PRODUCTOS = [
+            { id: 1, nombre: "Bolsas Negras 200L", precio: 18500, icono: "🗑" },
+            { id: 2, nombre: "Bolsas Verdes 120L", precio: 14200, icono: "🗑" },
+            { id: 3, nombre: "Ariel Profesional 10kg", precio: 52000, icono: "🧴" },
+            { id: 4, nombre: "Fabuloso Multiusos 4L", precio: 28000, icono: "🧴" },
+            { id: 5, nombre: "Papel Scott 400m", precio: 8500, icono: "🧻" },
+            { id: 6, nombre: "Lysol Spray 750ml", precio: 68000, icono: "✨" },
         ];
 
-        const CLIENT_TYPES = ["Condominio", "Club", "Clínica", "Hotel", "Empresa", "Otro"];
+        const formatear = (n) => {
+            return new Intl.NumberFormat("es-CO", { 
+                style: "currency", 
+                currency: "COP",
+                maximumFractionDigits: 0 
+            }).format(n);
+        };
 
-        const STATUSES = [
-          { key: "pending",   label: "Orden Creada",  icon: "○" },
-          { key: "approved",  label: "Aprobada",      icon: "✓" },
-          { key: "paid",      label: "Pago Recibido", icon: "✓" },
-          { key: "preparing", label: "Preparando",    icon: "○" },
-          { key: "transit",   label: "En Camino",     icon: "→" },
-          { key: "delivered", label: "Entregado",     icon: "✓" },
-        ];
-
-        const fmt = (n) => new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(n);
-        const fmtDate = (d) => new Date(d).toLocaleString("es-CO", { dateStyle: "short", timeStyle: "short" });
-        const genId = (prefix) => prefix + "-" + String(Date.now()).slice(-6);
-
-        // ── ROOT ──────────────────────────────────────────────────────────────────────
+        // ── COMPONENTE PRINCIPAL ──
         function App() {
-          const [screen, setScreen]   = useState("login");   // login | register | home | catalog | cart | transfer | confirm | orders | tracking
-          const [clients, setClients] = useState([]);
-          const [activeClient, setActiveClient] = useState(null);
-          const [cart, setCart]       = useState([]);
-          const [orders, setOrders]   = useState([]);
-          const [trackId, setTrackId] = useState(null);
-          const [filterCat, setFilterCat] = useState("Todos");
-          const [search, setSearch]   = useState("");
-          const [toast, setToast]     = useState(null);
-          const toastTimer = useRef(null);
+            const [pantalla, setPantalla] = useState("login");
+            const [cliente, setCliente] = useState(null);
+            const [clientes, setClientes] = useState([]);
+            const [carrito, setCarrito] = useState([]);
+            const [mensaje, setMensaje] = useState(null);
 
-          const notify = (msg, err = false) => {
-            setToast({ msg, err });
-            clearTimeout(toastTimer.current);
-            toastTimer.current = setTimeout(() => setToast(null), 3500);
-          };
-
-          // ── CART HELPERS ────────────────────────────────────────────────────────────
-          const addToCart = (p) => {
-            setCart(prev => {
-              const ex = prev.find(i => i.id === p.id);
-              return ex ? prev.map(i => i.id === p.id ? { ...i, qty: i.qty + 1 } : i) : [...prev, { ...p, qty: 1 }];
-            });
-            notify(`${p.name} agregado al carrito`);
-          };
-          const changeQty = (id, d) => setCart(prev => prev.map(i => i.id === id ? { ...i, qty: Math.max(1, i.qty + d) } : i));
-          const removeItem = (id) => setCart(prev => prev.filter(i => i.id !== id));
-          const cartTotal  = cart.reduce((s, i) => s + i.price * i.qty, 0);
-          const cartQty    = cart.reduce((s, i) => s + i.qty, 0);
-
-          // ── ORDER ────────────────────────────────────────────────────────────────────
-          const placeOrder = () => {
-            const id = genId("TH");
-            const o = {
-              id, clientId: activeClient.id, clientName: activeClient.name,
-              items: [...cart], total: cartTotal, status: "approved",
-              createdAt: new Date().toISOString(),
-              events: [
-                { status: "pending",  at: new Date(Date.now() - 60000).toISOString() },
-                { status: "approved", at: new Date(Date.now() - 20000).toISOString() },
-                { status: "paid",     at: new Date().toISOString() },
-              ],
+            // Mostrar mensaje temporal
+            const mostrarMensaje = (texto) => {
+                setMensaje(texto);
+                setTimeout(() => setMensaje(null), 3000);
             };
-            setOrders(prev => [o, ...prev]);
-            setCart([]);
-            setTrackId(id);
-            setScreen("orders");
-            notify(`Pedido ${id} confirmado`);
 
-            const flow = ["preparing", "transit", "delivered"];
-            let i = 0;
-            const advance = () => {
-              if (i >= flow.length) return;
-              const st = flow[i++];
-              setOrders(prev => prev.map(x => x.id === id
-                ? { ...x, status: st, events: [...x.events, { status: st, at: new Date().toISOString() }] }
-                : x));
-              notify(STATUSES.find(s => s.key === st)?.label);
-              if (i < flow.length) setTimeout(advance, 6000);
+            // Agregar al carrito
+            const agregarAlCarrito = (producto) => {
+                const existe = carrito.find(item => item.id === producto.id);
+                if (existe) {
+                    setCarrito(carrito.map(item => 
+                        item.id === producto.id 
+                            ? { ...item, cantidad: item.cantidad + 1 }
+                            : item
+                    ));
+                } else {
+                    setCarrito([...carrito, { ...producto, cantidad: 1 }]);
+                }
+                mostrarMensaje(`${producto.nombre} agregado`);
             };
-            setTimeout(advance, 4000);
-          };
 
-          // ── REGISTER CLIENT ──────────────────────────────────────────────────────────
-          const registerClient = (data) => {
-            const newClient = { ...data, id: genId("C"), balance: 0, createdAt: new Date().toISOString() };
-            setClients(prev => [...prev, newClient]);
-            setActiveClient(newClient);
+            // Cambiar cantidad
+            const cambiarCantidad = (id, delta) => {
+                setCarrito(carrito.map(item => 
+                    item.id === id 
+                        ? { ...item, cantidad: Math.max(1, item.cantidad + delta) }
+                        : item
+                ));
+            };
 
-            // WhatsApp notification
-            const msg = encodeURIComponent(
-              `✅ *Nuevo cliente registrado en TUHORDER*\n\n` +
-              `👤 *Nombre:* ${data.name}\n` +
-              `🏢 *Tipo:* ${data.type}\n` +
-              `📞 *Teléfono:* ${data.phone}\n` +
-              `📧 *Email:* ${data.email}\n` +
-              `🆔 *ID asignado:* ${newClient.id}\n` +
-              `📅 *Registro:* ${new Date().toLocaleString("es-CO")}`
-            );
-            window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, "_blank");
-            setScreen("home");
-            notify("Cliente registrado. Notificación enviada por WhatsApp.");
-          };
+            // Eliminar del carrito
+            const eliminarDelCarrito = (id) => {
+                setCarrito(carrito.filter(item => item.id !== id));
+            };
 
-          const login = (client) => {
-            setActiveClient(client);
-            setScreen("home");
-            notify(`Bienvenido, ${client.name}`);
-          };
+            // Total del carrito
+            const totalCarrito = carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+            const cantidadItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
 
-          const logout = () => {
-            setActiveClient(null);
-            setCart([]);
-            setScreen("login");
-          };
+            // Registrar cliente
+            const registrarCliente = (datos) => {
+                const nuevoCliente = {
+                    ...datos,
+                    id: "C-" + Date.now().toString().slice(-6)
+                };
+                setClientes([...clientes, nuevoCliente]);
+                setCliente(nuevoCliente);
+                setPantalla("home");
+                mostrarMensaje("Cliente registrado con éxito");
+            };
 
-          // ── FILTERED PRODUCTS ───────────────────────────────────────────────────────
-          const cats = ["Todos", ...new Set(PRODUCTS.map(p => p.cat))];
-          const filtered = PRODUCTS.filter(p =>
-            (filterCat === "Todos" || p.cat === filterCat) &&
-            p.name.toLowerCase().includes(search.toLowerCase())
-          );
+            // Iniciar sesión
+            const iniciarSesion = (clienteSeleccionado) => {
+                setCliente(clienteSeleccionado);
+                setPantalla("home");
+                mostrarMensaje(`Bienvenido ${clienteSeleccionado.nombre}`);
+            };
 
-          const activeOrder = orders.find(o => o.id === trackId);
+            // Cerrar sesión
+            const cerrarSesion = () => {
+                setCliente(null);
+                setCarrito([]);
+                setPantalla("login");
+            };
 
-          // ── RENDER ──────────────────────────────────────────────────────────────────
-          const styles = getStyles();
+            return (
+                <div style={{ padding: '16px', paddingBottom: '80px' }}>
+                    {/* Mensaje Toast */}
+                    {mensaje && (
+                        <div className="toast">{mensaje}</div>
+                    )}
 
-          return (
-            <div style={styles.root}>
-              {toast && <div style={{ ...styles.toast, background: toast.err ? "#111" : "#000" }} className="toast-enter">{toast.msg}</div>}
-
-              <Header
-                screen={screen} client={activeClient} cartQty={cartQty}
-                onCart={() => setScreen("cart")} onLogout={logout}
-                onBack={() => {
-                  if (screen === "cart")     setScreen("catalog");
-                  else if (screen === "transfer") setScreen("cart");
-                  else if (screen === "confirm")  setScreen("transfer");
-                  else if (screen === "tracking") setScreen("orders");
-                  else setScreen("home");
-                }}
-              />
-
-              <main style={styles.main}>
-                {screen === "login"    && <Login clients={clients} onLogin={login} onRegister={() => setScreen("register")} />}
-                {screen === "register" && <Register onSubmit={registerClient} onBack={() => setScreen("login")} />}
-                {screen === "home"     && <Home client={activeClient} orders={orders} setScreen={setScreen} setTrackId={setTrackId} />}
-                {screen === "catalog"  && (
-                  <Catalog products={filtered} cats={cats} filterCat={filterCat} setFilterCat={setFilterCat}
-                    search={search} setSearch={setSearch} cart={cart} addToCart={addToCart}
-                    changeQty={changeQty} cartQty={cartQty} cartTotal={cartTotal} setScreen={setScreen} />
-                )}
-                {screen === "cart"     && (
-                  <Cart cart={cart} changeQty={changeQty} removeItem={removeItem} cartTotal={cartTotal}
-                    setScreen={setScreen} />
-                )}
-                {screen === "transfer" && <Transfer cartTotal={cartTotal} setScreen={setScreen} />}
-                {screen === "confirm"  && <Confirm cart={cart} cartTotal={cartTotal} onPlace={placeOrder} setScreen={setScreen} />}
-                {screen === "orders"   && (
-                  <Orders orders={orders} onTrack={(id) => { setTrackId(id); setScreen("tracking"); }} />
-                )}
-                {screen === "tracking" && activeOrder && <Tracking order={activeOrder} />}
-                {screen === "tracking" && !activeOrder && (
-                  <div style={styles.empty}>Sin pedido seleccionado.<br /><br />
-                    <BtnPrimary onClick={() => setScreen("orders")}>Ver pedidos</BtnPrimary>
-                  </div>
-                )}
-              </main>
-
-              {activeClient && screen !== "login" && screen !== "register" && (
-                <BottomNav screen={screen} setScreen={setScreen} />
-              )}
-            </div>
-          );
-        }
-
-        // ── HEADER ────────────────────────────────────────────────────────────────────
-        function Header({ screen, client, cartQty, onCart, onLogout, onBack }) {
-          const styles = getStyles();
-          const hasBack = ["cart","transfer","confirm","tracking","register"].includes(screen);
-          const showCart = client && ["catalog"].includes(screen);
-          return (
-            <header style={styles.header}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                {hasBack
-                  ? <button style={styles.iconBtn} onClick={onBack}>←</button>
-                  : <div style={styles.logoMark}>TH</div>}
-                <div>
-                  <div style={styles.logoText}>TUHORDER</div>
-                  {client && <div style={styles.headerSub}>{client.name}</div>}
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                {showCart && (
-                  <button style={styles.iconBtn} onClick={onCart}>
-                    🛒{cartQty > 0 && <sup style={styles.sup}>{cartQty}</sup>}
-                  </button>
-                )}
-                {client && !hasBack && (
-                  <button style={{ ...styles.iconBtn, fontSize: 12 }} onClick={onLogout}>Salir</button>
-                )}
-              </div>
-            </header>
-          );
-        }
-
-        // ── BOTTOM NAV ────────────────────────────────────────────────────────────────
-        function BottomNav({ screen, setScreen }) {
-          const styles = getStyles();
-          const tabs = [
-            { key: "home",    label: "Inicio",   icon: "⌂" },
-            { key: "catalog", label: "Ordenar",  icon: "+" },
-            { key: "orders",  label: "Pedidos",  icon: "≡" },
-            { key: "tracking",label: "Tracking", icon: "→" },
-          ];
-          const active = tabs.find(t => t.key === screen)?.key || "home";
-          return (
-            <nav style={styles.nav}>
-              {tabs.map(t => (
-                <button key={t.key} style={{ ...styles.navBtn, ...(active === t.key ? styles.navActive : {}) }}
-                  onClick={() => setScreen(t.key)}>
-                  <span style={{ fontSize: 18 }}>{t.icon}</span>
-                  <span style={{ fontSize: 10 }}>{t.label}</span>
-                </button>
-              ))}
-            </nav>
-          );
-        }
-
-        // ── LOGIN ─────────────────────────────────────────────────────────────────────
-        function Login({ clients, onLogin, onRegister }) {
-          const styles = getStyles();
-          const [sel, setSel] = useState("");
-          return (
-            <div style={styles.screen} className="fade-in">
-              <div style={styles.centered}>
-                <div style={styles.logoMarkLg}>TH</div>
-                <div style={{ fontWeight: 800, fontSize: 22, letterSpacing: 2, marginTop: 12 }}>TUHORDER</div>
-                <div style={{ color: "#666", fontSize: 13, marginTop: 4 }}>Plataforma de suministros</div>
-              </div>
-
-              <div style={{ marginTop: 40 }}>
-                <Label>Selecciona tu cuenta</Label>
-                <select style={styles.input} value={sel} onChange={e => setSel(e.target.value)}>
-                  <option value="">-- Elige un cliente --</option>
-                  {clients.map(c => <option key={c.id} value={c.id}>{c.name} ({c.type})</option>)}
-                </select>
-                <BtnPrimary onClick={() => { const c = clients.find(x => x.id === sel); if (c) onLogin(c); }}
-                  disabled={!sel}>
-                  Ingresar
-                </BtnPrimary>
-
-                <Divider label="o" />
-
-                <BtnSecondary onClick={onRegister}>Registrar nuevo cliente</BtnSecondary>
-
-                {clients.length === 0 && (
-                  <div style={styles.hint}>Aún no hay clientes registrados.<br />Crea el primero.</div>
-                )}
-              </div>
-            </div>
-          );
-        }
-
-        // ── REGISTER ──────────────────────────────────────────────────────────────────
-        function Register({ onSubmit, onBack }) {
-          const styles = getStyles();
-          const [form, setForm] = useState({ name: "", type: "Condominio", phone: "", email: "", address: "", contact: "" });
-          const [errors, setErrors] = useState({});
-
-          const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-
-          const validate = () => {
-            const e = {};
-            if (!form.name.trim())    e.name    = "Requerido";
-            if (!form.phone.trim())   e.phone   = "Requerido";
-            if (!form.email.trim())   e.email   = "Requerido";
-            if (!form.contact.trim()) e.contact = "Requerido";
-            setErrors(e);
-            return Object.keys(e).length === 0;
-          };
-
-          const handleSubmit = () => { if (validate()) onSubmit(form); };
-
-          return (
-            <div style={styles.screen} className="fade-in">
-              <div style={styles.pageTitle}>Nuevo Cliente</div>
-              <div style={styles.pageSubtitle}>Al registrar, se enviará una notificación por WhatsApp al equipo TUHORDER.</div>
-
-              <Field label="Nombre / Razón Social *" error={errors.name}>
-                <input style={{ ...styles.input, ...(errors.name ? styles.inputError : {}) }} placeholder="Ej: Condominio Las Palmas"
-                  value={form.name} onChange={e => set("name", e.target.value)} />
-              </Field>
-
-              <Field label="Tipo de Cliente *">
-                <select style={styles.input} value={form.type} onChange={e => set("type", e.target.value)}>
-                  {CLIENT_TYPES.map(t => <option key={t}>{t}</option>)}
-                </select>
-              </Field>
-
-              <Field label="Teléfono / WhatsApp *" error={errors.phone}>
-                <input style={{ ...styles.input, ...(errors.phone ? styles.inputError : {}) }} placeholder="+58 414 000 0000"
-                  value={form.phone} onChange={e => set("phone", e.target.value)} />
-              </Field>
-
-              <Field label="Correo electrónico *" error={errors.email}>
-                <input style={{ ...styles.input, ...(errors.email ? styles.inputError : {}) }} placeholder="correo@empresa.com"
-                  type="email" value={form.email} onChange={e => set("email", e.target.value)} />
-              </Field>
-
-              <Field label="Persona de contacto *" error={errors.contact}>
-                <input style={{ ...styles.input, ...(errors.contact ? styles.inputError : {}) }} placeholder="Nombre del responsable"
-                  value={form.contact} onChange={e => set("contact", e.target.value)} />
-              </Field>
-
-              <Field label="Dirección">
-                <input style={styles.input} placeholder="Dirección (opcional)"
-                  value={form.address} onChange={e => set("address", e.target.value)} />
-              </Field>
-
-              <div style={{ marginTop: 8, padding: "12px 14px", border: "1px solid #e5e5e5", borderRadius: 8, fontSize: 12, color: "#555", lineHeight: 1.6 }}>
-                Al confirmar, se abrirá WhatsApp con los datos del cliente para notificar al equipo.
-              </div>
-
-              <BtnPrimary onClick={handleSubmit} style={{ marginTop: 16 }}>
-                Registrar y notificar por WhatsApp →
-              </BtnPrimary>
-              <BtnSecondary onClick={onBack}>Volver</BtnSecondary>
-            </div>
-          );
-        }
-
-        // ── HOME ──────────────────────────────────────────────────────────────────────
-        function Home({ client, orders, setScreen, setTrackId }) {
-          const styles = getStyles();
-          const active  = orders.filter(o => o.status !== "delivered").length;
-          const last    = orders[0];
-          return (
-            <div style={styles.screen} className="fade-in">
-              <div style={styles.heroBanner}>
-                <div style={{ fontSize: 11, color: "#999", marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>{client.type}</div>
-                <div style={{ fontSize: 20, fontWeight: 800 }}>{client.name}</div>
-                <div style={{ fontSize: 11, color: "#999", marginTop: 4 }}>ID {client.id}</div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18, alignItems: "flex-end" }}>
-                  <div>
-                    <div style={{ fontSize: 10, color: "#888" }}>Pedidos activos</div>
-                    <div style={{ fontSize: 28, fontWeight: 900, lineHeight: 1 }}>{active}</div>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontSize: 10, color: "#888" }}>Total pedidos</div>
-                    <div style={{ fontSize: 28, fontWeight: 900, lineHeight: 1 }}>{orders.length}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div style={styles.quickGrid}>
-                {[
-                  { label: "Nueva Orden",  icon: "+",  action: () => setScreen("catalog") },
-                  { label: "Mis Pedidos",  icon: "≡",  action: () => setScreen("orders") },
-                  { label: "Tracking",     icon: "→",  action: () => setScreen("tracking") },
-                  { label: "Soporte",      icon: "?",  action: () => window.open(`https://wa.me/${WA_NUMBER}`, "_blank") },
-                ].map(q => (
-                  <button key={q.label} style={styles.quickBtn} onClick={q.action}>
-                    <span style={{ fontSize: 22, fontWeight: 900 }}>{q.icon}</span>
-                    <span style={{ fontSize: 11, marginTop: 5, fontWeight: 600 }}>{q.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              {last && (
-                <div style={styles.card}>
-                  <div style={styles.cardLabel}>Último pedido</div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: 15 }}>{last.id}</div>
-                      <div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>{fmtDate(last.createdAt)}</div>
+                    {/* Header */}
+                    <div style={{ 
+                        background: '#fff', 
+                        padding: '12px 16px', 
+                        borderRadius: '12px',
+                        marginBottom: '16px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ 
+                                background: '#000', 
+                                color: '#fff',
+                                width: '36px',
+                                height: '36px',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 'bold',
+                                fontSize: '14px'
+                            }}>TH</div>
+                            <div>
+                                <div style={{ fontWeight: 'bold', fontSize: '16px' }}>TUHORDER</div>
+                                {cliente && (
+                                    <div style={{ fontSize: '11px', color: '#999' }}>{cliente.nombre}</div>
+                                )}
+                            </div>
+                        </div>
+                        <div>
+                            {cliente && pantalla !== 'login' && (
+                                <button 
+                                    onClick={cerrarSesion}
+                                    style={{
+                                        background: 'none',
+                                        border: '1px solid #ddd',
+                                        padding: '6px 12px',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        fontSize: '12px'
+                                    }}
+                                >
+                                    Salir
+                                </button>
+                            )}
+                        </div>
                     </div>
-                    <StatusTag status={last.status} />
-                  </div>
-                  <div style={{ fontSize: 12, color: "#666", marginTop: 8 }}>
-                    {last.items.length} producto(s) · {fmt(last.total * 1.16)}
-                  </div>
-                  <div style={styles.cardLink} onClick={() => { setTrackId(last.id); setScreen("tracking"); }}>
-                    Ver tracking →
-                  </div>
-                </div>
-              )}
 
-              <div style={styles.card}>
-                <div style={styles.cardLabel}>Categorías disponibles</div>
-                {["Bolsas de Basura", "Detergentes", "Papel Higiénico", "Desinfectantes"].map(c => (
-                  <div key={c} style={styles.catRow} onClick={() => setScreen("catalog")}>
-                    <span style={{ fontSize: 13 }}>{c}</span>
-                    <span style={{ color: "#bbb" }}>›</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        }
-
-        // ── CATALOG ───────────────────────────────────────────────────────────────────
-        function Catalog({ products, cats, filterCat, setFilterCat, search, setSearch, cart, addToCart, changeQty, cartQty, cartTotal, setScreen }) {
-          const styles = getStyles();
-          return (
-            <div style={styles.screen} className="fade-in">
-              <input style={styles.searchInput} placeholder="Buscar producto..." value={search}
-                onChange={e => setSearch(e.target.value)} />
-              <div style={styles.catScroll}>
-                {cats.map(c => (
-                  <button key={c} style={{ ...styles.chip, ...(filterCat === c ? styles.chipActive : {}) }}
-                    onClick={() => setFilterCat(c)}>{c}</button>
-                ))}
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {products.map(p => {
-                  const inCart = cart.find(i => i.id === p.id);
-                  return (
-                    <div key={p.id} style={styles.prodRow}>
-                      <div style={styles.prodIconBox}>{p.icon}</div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 600, fontSize: 13 }}>{p.name}</div>
-                        <div style={{ fontSize: 11, color: "#888" }}>{p.unit} · stock {p.stock}</div>
-                        <div style={{ fontWeight: 700, fontSize: 13, marginTop: 3 }}>{fmt(p.price)}</div>
-                      </div>
-                      {inCart
-                        ? <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <button style={styles.qtyBtn} onClick={() => changeQty(p.id, -1)}>−</button>
-                            <span style={{ fontWeight: 700, fontSize: 13, minWidth: 18, textAlign: "center" }}>{inCart.qty}</span>
-                            <button style={styles.qtyBtn} onClick={() => changeQty(p.id, 1)}>+</button>
-                          </div>
-                        : <button style={styles.addBtn} onClick={() => addToCart(p)}>+</button>}
-                    </div>
-                  );
-                })}
-              </div>
-              {cartQty > 0 && (
-                <div style={styles.floatBar} onClick={() => setScreen("cart")}>
-                  <span>Ver carrito ({cartQty})</span>
-                  <span style={{ fontWeight: 800 }}>{fmt(cartTotal)} →</span>
-                </div>
-              )}
-            </div>
-          );
-        }
-
-        // ── CART ──────────────────────────────────────────────────────────────────────
-        function Cart({ cart, changeQty, removeItem, cartTotal, setScreen }) {
-          const styles = getStyles();
-          return (
-            <div style={styles.screen} className="fade-in">
-              <div style={styles.pageTitle}>Carrito</div>
-              {cart.length === 0
-                ? <div style={styles.empty}>El carrito está vacío<br /><br /><BtnSecondary onClick={() => setScreen("catalog")}>Ver productos</BtnSecondary></div>
-                : <>
-                  {cart.map(item => (
-                    <div key={item.id} style={styles.cartRow}>
-                      <span style={{ fontSize: 22 }}>{item.icon}</span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 600, fontSize: 13 }}>{item.name}</div>
-                        <div style={{ fontSize: 11, color: "#888" }}>{fmt(item.price)} / {item.unit}</div>
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <button style={styles.qtyBtn} onClick={() => changeQty(item.id, -1)}>−</button>
-                        <span style={{ fontWeight: 700, fontSize: 13, minWidth: 20, textAlign: "center" }}>{item.qty}</span>
-                        <button style={styles.qtyBtn} onClick={() => changeQty(item.id, 1)}>+</button>
-                      </div>
-                      <button style={{ background: "none", border: "none", color: "#bbb", cursor: "pointer", fontSize: 14, padding: "0 2px" }}
-                        onClick={() => removeItem(item.id)}>✕</button>
-                    </div>
-                  ))}
-                  <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", fontSize: 15 }}>
-                    <span style={{ color: "#666" }}>Total</span>
-                    <span style={{ fontWeight: 800 }}>{fmt(cartTotal)}</span>
-                  </div>
-                  <BtnPrimary onClick={() => setScreen("transfer")}>Continuar al pago →</BtnPrimary>
-                </>}
-            </div>
-          );
-        }
-
-        // ── TRANSFER ──────────────────────────────────────────────────────────────────
-        function Transfer({ cartTotal, setScreen }) {
-          const styles = getStyles();
-          const iva = cartTotal * 0.16;
-          const total = cartTotal * 1.16;
-          return (
-            <div style={styles.screen} className="fade-in">
-              <div style={styles.pageTitle}>Datos de Pago</div>
-              <div style={styles.card}>
-                <div style={styles.cardLabel}>Transferencia bancaria</div>
-                {[["Banco","Bancolombia"],["Tipo","Cuenta Corriente"],["Número","069-123456-78"],["NIT","900.123.456-7"],["Titular","TUHORDER S.A.S"]].map(([k,v]) => (
-                  <div key={k} style={styles.dataRow}>
-                    <span style={{ color: "#888", fontSize: 13 }}>{k}</span>
-                    <span style={{ fontWeight: 600, fontSize: 13 }}>{v}</span>
-                  </div>
-                ))}
-              </div>
-              <div style={styles.card}>
-                <div style={styles.cardLabel}>Resumen</div>
-                <div style={styles.dataRow}><span style={{ color: "#888", fontSize: 13 }}>Subtotal</span><span style={{ fontWeight: 600, fontSize: 13 }}>{fmt(cartTotal)}</span></div>
-                <div style={styles.dataRow}><span style={{ color: "#888", fontSize: 13 }}>IVA 16%</span><span style={{ fontWeight: 600, fontSize: 13 }}>{fmt(iva)}</span></div>
-                <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 10, marginTop: 6, borderTop: "1px solid #eee" }}>
-                  <span style={{ fontWeight: 700 }}>Total a pagar</span>
-                  <span style={{ fontWeight: 900, fontSize: 16 }}>{fmt(total)}</span>
-                </div>
-              </div>
-              <div style={{ fontSize: 12, color: "#888", padding: "12px 14px", border: "1px solid #eee", borderRadius: 8, marginBottom: 14, lineHeight: 1.7 }}>
-                Realiza la transferencia y confirma. El sistema aprobará el pedido automáticamente.
-              </div>
-              <BtnPrimary onClick={() => setScreen("confirm")}>Confirmar transferencia ✓</BtnPrimary>
-            </div>
-          );
-        }
-
-        // ── CONFIRM ───────────────────────────────────────────────────────────────────
-        function Confirm({ cart, cartTotal, onPlace, setScreen }) {
-          const styles = getStyles();
-          return (
-            <div style={styles.screen} className="fade-in">
-              <div style={styles.pageTitle}>Confirmación</div>
-              <div style={{ textAlign: "center", padding: "28px 0 18px" }}>
-                <div style={{ fontSize: 52, lineHeight: 1 }}>✓</div>
-                <div style={{ fontWeight: 800, fontSize: 18, marginTop: 10 }}>Pago registrado</div>
-                <div style={{ color: "#888", fontSize: 13, marginTop: 5 }}>Tu pedido está pendiente de despacho.</div>
-              </div>
-              <div style={styles.card}>
-                <div style={styles.cardLabel}>Detalle</div>
-                {cart.map(i => (
-                  <div key={i.id} style={styles.dataRow}>
-                    <span style={{ fontSize: 12 }}>{i.icon} {i.name} ×{i.qty}</span>
-                    <span style={{ fontWeight: 600, fontSize: 12 }}>{fmt(i.price * i.qty)}</span>
-                  </div>
-                ))}
-                <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 10, marginTop: 6, borderTop: "1px solid #eee" }}>
-                  <span style={{ fontWeight: 700 }}>Total con IVA 16%</span>
-                  <span style={{ fontWeight: 900, fontSize: 15 }}>{fmt(cartTotal * 1.16)}</span>
-                </div>
-              </div>
-              <BtnPrimary onClick={onPlace}>Enviar pedido →</BtnPrimary>
-              <BtnSecondary onClick={() => setScreen("transfer")}>Volver</BtnSecondary>
-            </div>
-          );
-        }
-
-        // ── ORDERS ────────────────────────────────────────────────────────────────────        function Orders({ orders, onTrack }) {
-          const styles = getStyles();
-          if (orders.length === 0) return (
-            <div style={styles.screen}>
-              <div style={styles.pageTitle}>Mis Pedidos</div>
-              <div style={styles.empty}>No tienes pedidos aún.</div>
-            </div>
-          );
-          return (
-            <div style={styles.screen} className="fade-in">
-              <div style={styles.pageTitle}>Mis Pedidos</div>
-              {orders.map(o => (
-                <div key={o.id} style={{ ...styles.card, cursor: "pointer" }} onClick={() => onTrack(o.id)}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: 14 }}>{o.id}</div>
-                      <div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>{fmtDate(o.createdAt)}</div>
-                    </div>
-                    <StatusTag status={o.status} />
-                  </div>
-                  <div style={{ fontSize: 12, color: "#555", marginTop: 8 }}>
-                    {o.items.map(i => `${i.icon} ${i.name} ×${i.qty}`).join(" · ")}
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
-                    <span style={{ fontSize: 12, color: "#888" }}>{o.items.length} productos</span>
-                    <span style={{ fontWeight: 700, fontSize: 13 }}>{fmt(o.total * 1.16)}</span>
-                  </div>
-                  <div style={styles.cardLink}>Ver tracking →</div>
-                </div>
-              ))}
-            </div>
-          );
-        }
-
-        // ── TRACKING ──────────────────────────────────────────────────────────────────
-        function Tracking({ order }) {
-          const styles = getStyles();
-          const curIdx = STATUSES.findIndex(s => s.key === order.status);
-          return (
-            <div style={styles.screen} className="fade-in">
-              <div style={styles.pageTitle}>Tracking · {order.id}</div>
-              <div style={styles.card}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                  <StatusTag status={order.status} />
-                  <span style={{ fontSize: 12, color: "#888" }}>{fmt(order.total * 1.16)}</span>
-                </div>
-                <div style={{ fontSize: 12, color: "#555" }}>
-                  {order.items.map(i => `${i.icon} ${i.name} ×${i.qty}`).join(", ")}
-                </div>
-              </div>
-
-              <div style={styles.card}>
-                {STATUSES.map((s, idx) => {
-                  const done   = idx <= curIdx;
-                  const active = idx === curIdx;
-                  const ev     = order.events?.find(e => e.status === s.key);
-                  return (
-                    <div key={s.key} style={{ display: "flex", alignItems: "flex-start" }}>
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 36, flexShrink: 0 }}>
-                        <div style={{
-                          width: 28, height: 28, borderRadius: "50%",
-                          background: done ? "#000" : "#f0f0f0",
-                          border: active ? "2px solid #000" : "1px solid #e0e0e0",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          color: done ? "#fff" : "#ccc", fontSize: 12, fontWeight: 700,
-                          transition: "all .4s",
-                        }}>{s.icon}</div>
-                        {idx < STATUSES.length - 1 && (
-                          <div style={{ width: 1, minHeight: 20, background: done ? "#000" : "#e5e5e5", margin: "3px 0" }} />
+                    {/* Contenido */}
+                    <div className="fade-in">
+                        {pantalla === 'login' && (
+                            <Login 
+                                clientes={clientes}
+                                onLogin={iniciarSesion}
+                                onRegister={() => setPantalla('register')}
+                            />
                         )}
-                      </div>
-                      <div style={{ paddingLeft: 12, paddingBottom: idx < STATUSES.length - 1 ? 18 : 0, paddingTop: 4 }}>
-                        <div style={{ fontSize: 13, fontWeight: done ? 700 : 400, color: done ? "#000" : "#bbb" }}>{s.label}</div>
-                        <div style={{ fontSize: 10, color: "#aaa", marginTop: 2 }}>{ev ? fmtDate(ev.at) : "Pendiente"}</div>
-                      </div>
+
+                        {pantalla === 'register' && (
+                            <Register 
+                                onRegister={registrarCliente}
+                                onBack={() => setPantalla('login')}
+                            />
+                        )}
+
+                        {pantalla === 'home' && (
+                            <Home 
+                                cliente={cliente}
+                                onNewOrder={() => setPantalla('catalog')}
+                                onOrders={() => setPantalla('orders')}
+                            />
+                        )}
+
+                        {pantalla === 'catalog' && (
+                            <Catalog 
+                                productos={PRODUCTOS}
+                                carrito={carrito}
+                                onAdd={agregarAlCarrito}
+                                onChangeQty={cambiarCantidad}
+                                onRemove={eliminarDelCarrito}
+                                total={totalCarrito}
+                                cantidad={cantidadItems}
+                                onCart={() => setPantalla('cart')}
+                            />
+                        )}
+
+                        {pantalla === 'cart' && (
+                            <Cart 
+                                carrito={carrito}
+                                onChangeQty={cambiarCantidad}
+                                onRemove={eliminarDelCarrito}
+                                total={totalCarrito}
+                                onCheckout={() => setPantalla('checkout')}
+                                onBack={() => setPantalla('catalog')}
+                            />
+                        )}
+
+                        {pantalla === 'checkout' && (
+                            <Checkout 
+                                total={totalCarrito}
+                                onConfirm={() => {
+                                    setCarrito([]);
+                                    setPantalla('orders');
+                                    mostrarMensaje('¡Pedido confirmado!');
+                                }}
+                                onBack={() => setPantalla('cart')}
+                            />
+                        )}
+
+                        {pantalla === 'orders' && (
+                            <Orders />
+                        )}
                     </div>
-                  );
-                })}
-              </div>
 
-              {order.status === "transit" && (
-                <div style={{ ...styles.card, textAlign: "center", padding: "20px 14px" }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "#888" }}>En camino</div>
-                  <div style={{ fontSize: 28, margin: "10px 0" }}>→</div>
-                  <div style={{ fontSize: 13, fontWeight: 600 }}>Llegada estimada: 45 min</div>
-                  <div style={{ fontSize: 11, color: "#888", marginTop: 3 }}>Transporte #TH-V021</div>
-                  <div style={{ display: "inline-block", background: "#000", color: "#fff", borderRadius: 20, padding: "3px 12px", fontSize: 10, fontWeight: 700, marginTop: 10 }}>● EN VIVO</div>
+                    {/* Bottom Navigation */}
+                    {cliente && pantalla !== 'login' && pantalla !== 'register' && (
+                        <div style={{
+                            position: 'fixed',
+                            bottom: 0,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: '100%',
+                            maxWidth: '420px',
+                            background: '#fff',
+                            borderTop: '1px solid #eee',
+                            display: 'flex',
+                            padding: '8px 0',
+                            zIndex: 100
+                        }}>
+                            {[
+                                { key: 'home', label: 'Inicio', icon: '🏠' },
+                                { key: 'catalog', label: 'Ordenar', icon: '🛒' },
+                                { key: 'orders', label: 'Pedidos', icon: '📦' },
+                            ].map(tab => (
+                                <button
+                                    key={tab.key}
+                                    onClick={() => setPantalla(tab.key)}
+                                    style={{
+                                        flex: 1,
+                                        border: 'none',
+                                        background: 'none',
+                                        padding: '8px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        gap: '2px',
+                                        cursor: 'pointer',
+                                        color: pantalla === tab.key ? '#000' : '#bbb',
+                                        fontWeight: pantalla === tab.key ? 'bold' : 'normal',
+                                        fontSize: '12px'
+                                    }}
+                                >
+                                    <span style={{ fontSize: '20px' }}>{tab.icon}</span>
+                                    <span>{tab.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
-              )}
-              {order.status === "delivered" && (
-                <div style={{ ...styles.card, textAlign: "center", padding: "20px 14px", border: "1px solid #000" }}>
-                  <div style={{ fontSize: 36 }}>✓</div>
-                  <div style={{ fontWeight: 800, fontSize: 15, marginTop: 8 }}>Pedido entregado</div>
-                  <div style={{ fontSize: 12, color: "#666", marginTop: 4 }}>Recibido satisfactoriamente. Gracias por usar TUHORDER.</div>
+            );
+        }
+
+        // ── LOGIN ──
+        function Login({ clientes, onLogin, onRegister }) {
+            const [seleccionado, setSeleccionado] = useState('');
+
+            return (
+                <div style={{ paddingTop: '20px' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                        <div style={{ 
+                            background: '#000', 
+                            color: '#fff',
+                            width: '64px',
+                            height: '64px',
+                            borderRadius: '16px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 'bold',
+                            fontSize: '24px',
+                            margin: '0 auto 12px'
+                        }}>TH</div>
+                        <h1 style={{ fontSize: '24px', marginBottom: '4px' }}>TUHORDER</h1>
+                        <p style={{ color: '#666', fontSize: '14px' }}>Plataforma de suministros</p>
+                    </div>
+
+                    <div>
+                        <label style={{ fontSize: '13px', fontWeight: '600', color: '#444', display: 'block', marginBottom: '6px' }}>
+                            Selecciona tu cuenta
+                        </label>
+                        <select
+                            value={seleccionado}
+                            onChange={(e) => setSeleccionado(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                border: '1px solid #ddd',
+                                borderRadius: '8px',
+                                fontSize: '14px',
+                                marginBottom: '12px'
+                            }}
+                        >
+                            <option value="">-- Elige un cliente --</option>
+                            {clientes.map(c => (
+                                <option key={c.id} value={c.id}>{c.nombre}</option>
+                            ))}
+                        </select>
+
+                        <button
+                            onClick={() => {
+                                const cliente = clientes.find(c => c.id === seleccionado);
+                                if (cliente) onLogin(cliente);
+                            }}
+                            disabled={!seleccionado}
+                            style={{
+                                width: '100%',
+                                padding: '14px',
+                                background: !seleccionado ? '#ddd' : '#000',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                cursor: !seleccionado ? 'not-allowed' : 'pointer',
+                                marginBottom: '12px'
+                            }}
+                        >
+                            Ingresar
+                        </button>
+
+                        <div style={{ textAlign: 'center', margin: '16px 0', color: '#bbb' }}>o</div>
+
+                        <button
+                            onClick={onRegister}
+                            style={{
+                                width: '100%',
+                                padding: '14px',
+                                background: '#fff',
+                                color: '#000',
+                                border: '1px solid #ddd',
+                                borderRadius: '8px',
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Registrar nuevo cliente
+                        </button>
+
+                        {clientes.length === 0 && (
+                            <div style={{ 
+                                textAlign: 'center', 
+                                marginTop: '20px', 
+                                color: '#aaa',
+                                fontSize: '13px',
+                                lineHeight: '1.6'
+                            }}>
+                                Aún no hay clientes registrados.<br />
+                                Crea el primero.
+                            </div>
+                        )}
+                    </div>
                 </div>
-              )}
-            </div>
-          );
+            );
         }
 
-        // ── SHARED COMPONENTS ─────────────────────────────────────────────────────────
-        function StatusTag({ status }) {
-          const s = STATUSES.find(x => x.key === status) || STATUSES[0];
-          const active = ["approved","paid","transit"].includes(status);
-          return (
-            <span style={{
-              fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 20,
-              background: status === "delivered" ? "#000" : active ? "#000" : "#f0f0f0",
-              color: status === "delivered" ? "#fff" : active ? "#fff" : "#888",
-              border: "1px solid " + (["delivered", ...["approved","paid","transit"]].includes(status) ? "#000" : "#e5e5e5"),
-            }}>
-              {s.icon} {s.label}
-            </span>
-          );
+        // ── REGISTER ──
+        function Register({ onRegister, onBack }) {
+            const [form, setForm] = useState({
+                nombre: '',
+                telefono: '',
+                email: '',
+                tipo: 'Condominio'
+            });
+
+            const handleSubmit = () => {
+                if (!form.nombre.trim() || !form.telefono.trim() || !form.email.trim()) {
+                    alert('Por favor completa todos los campos requeridos');
+                    return;
+                }
+                onRegister(form);
+            };
+
+            return (
+                <div>
+                    <h2 style={{ fontSize: '20px', marginBottom: '8px' }}>Nuevo Cliente</h2>
+                    <p style={{ color: '#888', fontSize: '13px', marginBottom: '20px' }}>
+                        Completa los datos para registrarte
+                    </p>
+
+                    <div style={{ marginBottom: '14px' }}>
+                        <label style={{ fontSize: '13px', fontWeight: '600', color: '#444', display: 'block', marginBottom: '6px' }}>
+                            Nombre / Razón Social *
+                        </label>
+                        <input
+                            value={form.nombre}
+                            onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                            placeholder="Ej: Condominio Las Palmas"
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                border: '1px solid #ddd',
+                                borderRadius: '8px',
+                                fontSize: '14px'
+                            }}
+                        />
+                    </div>
+
+                    <div style={{ marginBottom: '14px' }}>
+                        <label style={{ fontSize: '13px', fontWeight: '600', color: '#444', display: 'block', marginBottom: '6px' }}>
+                            Tipo de Cliente *
+                        </label>
+                        <select
+                            value={form.tipo}
+                            onChange={(e) => setForm({ ...form, tipo: e.target.value })}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                border: '1px solid #ddd',
+                                borderRadius: '8px',
+                                fontSize: '14px'
+                            }}
+                        >
+                            {['Condominio', 'Club', 'Clínica', 'Hotel', 'Empresa', 'Otro'].map(t => (
+                                <option key={t}>{t}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div style={{ marginBottom: '14px' }}>
+                        <label style={{ fontSize: '13px', fontWeight: '600', color: '#444', display: 'block', marginBottom: '6px' }}>
+                            Teléfono / WhatsApp *
+                        </label>
+                        <input
+                            value={form.telefono}
+                            onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+                            placeholder="+58 414 000 0000"
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                border: '1px solid #ddd',
+                                borderRadius: '8px',
+                                fontSize: '14px'
+                            }}
+                        />
+                    </div>
+
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{ fontSize: '13px', fontWeight: '600', color: '#444', display: 'block', marginBottom: '6px' }}>
+                            Correo electrónico *
+                        </label>
+                        <input
+                            value={form.email}
+                            onChange={(e) => setForm({ ...form, email: e.target.value })}
+                            placeholder="correo@empresa.com"
+                            type="email"
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                border: '1px solid #ddd',
+                                borderRadius: '8px',
+                                fontSize: '14px'
+                            }}
+                        />
+                    </div>
+
+                    <button
+                        onClick={handleSubmit}
+                        style={{
+                            width: '100%',
+                            padding: '14px',
+                            background: '#000',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            marginBottom: '10px'
+                        }}
+                    >
+                        Registrar →
+                    </button>
+
+                    <button
+                        onClick={onBack}
+                        style={{
+                            width: '100%',
+                            padding: '14px',
+                            background: '#fff',
+                            color: '#000',
+                            border: '1px solid #ddd',
+                            borderRadius: '8px',
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Volver
+                    </button>
+                </div>
+            );
         }
 
-        function BtnPrimary({ children, onClick, disabled, style }) {
-          const styles = getStyles();
-          return (
-            <button onClick={onClick} disabled={disabled}
-              style={{ ...styles.btnPrimary, ...style, ...(disabled ? { background: "#ddd", color: "#aaa", cursor: "not-allowed" } : {}) }}>
-              {children}
-            </button>
-          );
+        // ── HOME ──
+        function Home({ cliente, onNewOrder, onOrders }) {
+            return (
+                <div>
+                    <div style={{
+                        background: '#000',
+                        borderRadius: '16px',
+                        padding: '20px',
+                        color: '#fff',
+                        marginBottom: '16px'
+                    }}>
+                        <div style={{ fontSize: '11px', color: '#999', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>
+                            {cliente?.tipo || 'Cliente'}
+                        </div>
+                        <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{cliente?.nombre}</div>
+                        <div style={{ fontSize: '11px', color: '#999', marginTop: '4px' }}>ID {cliente?.id}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+                            <div>
+                                <div style={{ fontSize: '10px', color: '#888' }}>Pedidos activos</div>
+                                <div style={{ fontSize: '28px', fontWeight: '900' }}>0</div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontSize: '10px', color: '#888' }}>Total pedidos</div>
+                                <div style={{ fontSize: '28px', fontWeight: '900' }}>0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+                        <button
+                            onClick={onNewOrder}
+                            style={{
+                                background: '#fff',
+                                border: '1px solid #eee',
+                                borderRadius: '12px',
+                                padding: '20px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '6px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <span style={{ fontSize: '28px' }}>🛒</span>
+                            <span style={{ fontWeight: '600', fontSize: '13px' }}>Nueva Orden</span>
+                        </button>
+
+                        <button
+                            onClick={onOrders}
+                            style={{
+                                background: '#fff',
+                                border: '1px solid #eee',
+                                borderRadius: '12px',
+                                padding: '20px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '6px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <span style={{ fontSize: '28px' }}>📦</span>
+                            <span style={{ fontWeight: '600', fontSize: '13px' }}>Mis Pedidos</span>
+                        </button>
+                    </div>
+
+                    <div style={{
+                        background: '#fff',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        border: '1px solid #eee'
+                    }}>
+                        <div style={{ fontSize: '10px', fontWeight: '700', color: '#bbb', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>
+                            Categorías disponibles
+                        </div>
+                        {['Bolsas de Basura', 'Detergentes', 'Papel Higiénico', 'Desinfectantes'].map(cat => (
+                            <div
+                                key={cat}
+                                onClick={onNewOrder}
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    padding: '10px 0',
+                                    borderBottom: '1px solid #f5f5f5',
+                                    cursor: 'pointer',
+                                    fontSize: '13px'
+                                }}
+                            >
+                                <span>{cat}</span>
+                                <span style={{ color: '#ccc' }}>›</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
         }
 
-        function BtnSecondary({ children, onClick }) {
-          const styles = getStyles();
-          return (
-            <button onClick={onClick} style={styles.btnSecondary}>
-              {children}
-            </button>
-          );
+        // ── CATALOG ──
+        function Catalog({ productos, carrito, onAdd, onChangeQty, onRemove, total, cantidad, onCart }) {
+            return (
+                <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                        <h2 style={{ fontSize: '20px' }}>Catálogo</h2>
+                        {cantidad > 0 && (
+                            <button
+                                onClick={onCart}
+                                style={{
+                                    background: '#000',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '20px',
+                                    padding: '8px 16px',
+                                    fontSize: '13px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                🛒 {cantidad} items
+                            </button>
+                        )}
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {productos.map(p => {
+                            const enCarrito = carrito.find(item => item.id === p.id);
+                            return (
+                                <div
+                                    key={p.id}
+                                    style={{
+                                        background: '#fff',
+                                        borderRadius: '12px',
+                                        padding: '14px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        border: '1px solid #eee'
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '44px',
+                                        height: '44px',
+                                        background: '#f5f5f5',
+                                        borderRadius: '10px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '24px'
+                                    }}>
+                                        {p.icono}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontWeight: '600', fontSize: '14px' }}>{p.nombre}</div>
+                                        <div style={{ fontWeight: '700', fontSize: '15px', marginTop: '2px' }}>
+                                            {formatear(p.precio)}
+                                        </div>
+                                    </div>
+                                    {enCarrito ? (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <button
+                                                onClick={() => onChangeQty(p.id, -1)}
+                                                style={{
+                                                    width: '30px',
+                                                    height: '30px',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid #ddd',
+                                                    background: '#f5f5f5',
+                                                    fontSize: '18px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                −
+                                            </button>
+                                            <span style={{ fontWeight: 'bold', fontSize: '14px', minWidth: '20px', textAlign: 'center' }}>
+                                                {enCarrito.cantidad}
+                                            </span>
+                                            <button
+                                                onClick={() => onChangeQty(p.id, 1)}
+                                                style={{
+                                                    width: '30px',
+                                                    height: '30px',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid #ddd',
+                                                    background: '#f5f5f5',
+                                                    fontSize: '18px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => onAdd(p)}
+                                            style={{
+                                                width: '34px',
+                                                height: '34px',
+                                                borderRadius: '8px',
+                                                border: 'none',
+                                                background: '#000',
+                                                color: '#fff',
+                                                fontSize: '22px',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}
+                                        >
+                                            +
+                                        </button>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {cantidad > 0 && (
+                        <div
+                            onClick={onCart}
+                            style={{
+                                position: 'sticky',
+                                bottom: '12px',
+                                marginTop: '16px',
+                                background: '#000',
+                                color: '#fff',
+                                borderRadius: '12px',
+                                padding: '16px',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                cursor: 'pointer',
+                                fontWeight: '600'
+                            }}
+                        >
+                            <span>Ver carrito ({cantidad})</span>
+                            <span>{formatear(total)} →</span>
+                        </div>
+                    )}
+                </div>
+            );
         }
 
-        function Field({ label, children, error }) {
-          const styles = getStyles();
-          return (
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: "#444", display: "block", marginBottom: 6 }}>{label}</label>
-              {children}
-              {error && <div style={{ fontSize: 11, color: "red", marginTop: 4 }}>{error}</div>}
-            </div>
-          );
+        // ── CART ──
+        function Cart({ carrito, onChangeQty, onRemove, total, onCheckout, onBack }) {
+            if (carrito.length === 0) {
+                return (
+                    <div>
+                        <h2 style={{ fontSize: '20px', marginBottom: '16px' }}>Carrito</h2>
+                        <div style={{ textAlign: 'center', padding: '40px 0', color: '#aaa' }}>
+                            <div style={{ fontSize: '48px', marginBottom: '12px' }}>🛒</div>
+                            <p>El carrito está vacío</p>
+                            <button
+                                onClick={onBack}
+                                style={{
+                                    marginTop: '16px',
+                                    padding: '12px 24px',
+                                    background: '#000',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Ver productos
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div>
+                    <h2 style={{ fontSize: '20px', marginBottom: '16px' }}>Carrito</h2>
+                    
+                    {carrito.map(item => (
+                        <div
+                            key={item.id}
+                            style={{
+                                background: '#fff',
+                                borderRadius: '12px',
+                                padding: '14px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                marginBottom: '8px',
+                                border: '1px solid #eee'
+                            }}
+                        >
+                            <span style={{ fontSize: '24px' }}>{item.icono}</span>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: '600', fontSize: '14px' }}>{item.nombre}</div>
+                                <div style={{ fontSize: '13px', color: '#888' }}>{formatear(item.precio)}</div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <button
+                                    onClick={() => onChangeQty(item.id, -1)}
+                                    style={{
+                                        width: '30px',
+                                        height: '30px',
+                                        borderRadius: '8px',
+                                        border: '1px solid #ddd',
+                                        background: '#f5f5f5',
+                                        fontSize: '18px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    −
+                                </button>
+                                <span style={{ fontWeight: 'bold', fontSize: '14px', minWidth: '20px', textAlign: 'center' }}>
+                                    {item.cantidad}
+                                </span>
+                                <button
+                                    onClick={() => onChangeQty(item.id, 1)}
+                                    style={{
+                                        width: '30px',
+                                        height: '30px',
+                                        borderRadius: '8px',
+                                        border: '1px solid #ddd',
+                                        background: '#f5f5f5',
+                                        fontSize: '18px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    +
+                                </button>
+                            </div>
+                            <button
+                                onClick={() => onRemove(item.id)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#ccc',
+                                    fontSize: '18px',
+                                    cursor: 'pointer',
+                                    padding: '0 4px'
+                                }}
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    ))}
+
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        padding: '16px 0',
+                        fontSize: '16px',
+                        fontWeight: 'bold'
+                    }}>
+                        <span>Total</span>
+                        <span>{formatear(total)}</span>
+                    </div>
+
+                    <button
+                        onClick={onCheckout}
+                        style={{
+                            width: '100%',
+                            padding: '14px',
+                            background: '#000',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            marginBottom: '10px'
+                        }}
+                    >
+                        Continuar al pago →
+                    </button>
+
+                    <button
+                        onClick={onBack}
+                        style={{
+                            width: '100%',
+                            padding: '14px',
+                            background: '#fff',
+                            color: '#000',
+                            border: '1px solid #ddd',
+                            borderRadius: '8px',
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Volver
+                    </button>
+                </div>
+            );
         }
 
-        function Label({ children }) {
-          return <label style={{ fontSize: 12, fontWeight: 600, color: "#444", display: "block", marginBottom: 6 }}>{children}</label>;
-        }
+        // ── CHECKOUT ──
+        function Checkout({ total, onConfirm, onBack }) {
+            const iva = total * 0.16;
+            const totalConIva = total * 1.16;
 
-        function Divider({ label }) {
-          return (
-            <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "16px 0" }}>
-              <div style={{ flex: 1, height: 1, background: "#eee" }} />
-              <span style={{ fontSize: 12, color: "#bbb" }}>{label}</span>
-              <div style={{ flex: 1, height: 1, background: "#eee" }} />
-            </div>
-          );
-        }
+            return (
+                <div>
+                    <h2 style={{ fontSize: '20px', marginBottom: '8px' }}>Confirmación de Pago</h2>
+                    <p style={{ color: '#888', fontSize: '13px', marginBottom: '20px' }}>
+                        Revisa los detalles de tu pedido
+                    </p>
 
-        // ── STYLES ────────────────────────────────────────────────────────────────────
-        function getStyles() {
-          return {
-            root:        { fontFamily: "'Inter',-apple-system,sans-serif", background: "#f5f5f5", minHeight: "100vh", maxWidth: 420, margin: "0 auto", display: "flex", flexDirection: "column", position: "relative" },
-            header:      { background: "#fff", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #eee", position: "sticky", top: 0, zIndex: 100 },
-            logoMark:    { width: 34, height: 34, background: "#000", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, color: "#fff", fontSize: 12, letterSpacing: -.5, flexShrink: 0 },
-            logoMarkLg:  { width: 56, height: 56, background: "#000", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, color: "#fff", fontSize: 18, letterSpacing: -1, margin: "0 auto" },
-            logoText:    { fontWeight: 800, fontSize: 14, letterSpacing: 1.5, color: "#000" },
-            headerSub:   { fontSize: 10, color: "#999", marginTop: 1 },
-            iconBtn:     { background: "none", border: "1px solid #e5e5e5", borderRadius: 8, padding: "5px 10px", cursor: "pointer", fontSize: 16, fontFamily: "inherit", color: "#000" },
-            sup:         { background: "#000", color: "#fff", borderRadius: 10, fontSize: 9, fontWeight: 800, padding: "1px 4px", verticalAlign: "super" },
-            main:        { flex: 1, overflowY: "auto", paddingBottom: 80 },
-            screen:      { padding: "16px 16px 8px" },
-            centered:    { textAlign: "center", paddingTop: 40 },
-            pageTitle:   { fontWeight: 800, fontSize: 18, color: "#000", marginBottom: 16 },
-            pageSubtitle:{ fontSize: 13, color: "#888", marginBottom: 20, lineHeight: 1.6 },
-            hint:        { textAlign: "center", fontSize: 12, color: "#bbb", marginTop: 20, lineHeight: 1.8 },
-            heroBanner:  { background: "#000", borderRadius: 14, padding: "20px 18px", color: "#fff", marginBottom: 14 },
-            quickGrid:   { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 },
-            quickBtn:    { background: "#fff", border: "1px solid #e5e5e5", borderRadius: 12, padding: "16px 10px", display: "flex", flexDirection: "column", alignItems: "center", cursor: "pointer", color: "#000", fontFamily: "inherit" },
-            card:        { background: "#fff", borderRadius: 12, padding: "14px 14px", marginBottom: 10, border: "1px solid #eee" },
-            cardLabel:   { fontSize: 10, fontWeight: 700, color: "#bbb", textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 },
-            cardLink:    { fontSize: 12, color: "#000", fontWeight: 600, marginTop: 10, cursor: "pointer" },
-            catRow:      { display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid #f5f5f5", fontSize: 13, cursor: "pointer" },
-            dataRow:     { display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid #f9f9f9" },
-            searchInput: { width: "100%", padding: "10px 12px", border: "1px solid #e5e5e5", borderRadius: 8, fontSize: 13, fontFamily: "inherit", outline: "none", marginBottom: 10, background: "#fff" },
-            catScroll:   { display: "flex", gap: 6, overflowX: "auto", paddingBottom: 10, scrollbarWidth: "none", marginBottom: 6 },
-            chip:        { padding: "5px 12px", borderRadius: 20, border: "1px solid #e5e5e5", background: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit", color: "#555" },
-            chipActive:  { background: "#000", color: "#fff", borderColor: "#000" },
-            prodRow:     { background: "#fff", borderRadius: 10, padding: "12px", display: "flex", alignItems: "center", gap: 10, border: "1px solid #eee" },
-            prodIconBox: { width: 38, height: 38, background: "#f5f5f5", borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 },
-            addBtn:      { width: 30, height: 30, borderRadius: 8, background: "#000", color: "#fff", border: "none", fontSize: 20, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
-            qtyBtn:      { width: 28, height: 28, borderRadius: 7, background: "#f5f5f5", border: "1px solid #e5e5e5", fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, flexShrink: 0 },
-            floatBar:    { position: "sticky", bottom: 12, background: "#000", color: "#fff", borderRadius: 10, padding: "13px 16px", display: "flex", justifyContent: "space-between", cursor: "pointer", margin: "14px 0 4px", fontSize: 13, fontWeight: 600 },
-            cartRow:     { background: "#fff", borderRadius: 10, padding: "12px", display: "flex", alignItems: "center", gap: 10, marginBottom: 8, border: "1px solid #eee" },
-            nav:         { position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 420, background: "#fff", borderTop: "1px solid #eee", display: "flex", zIndex: 100 },
-            navBtn:      { flex: 1, border: "none", background: "none", padding: "10px 4px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, cursor: "pointer", color: "#bbb", fontFamily: "inherit" },
-            navActive:   { color: "#000", fontWeight: 700 },
-            input:       { width: "100%", padding: "10px 12px", border: "1px solid #e5e5e5", borderRadius: 8, fontSize: 13, fontFamily: "inherit", outline: "none", background: "#fff", color: "#000" },
-            inputError:  { borderColor: "red" },
-            empty:       { textAlign: "center", padding: "50px 20px", color: "#bbb", fontSize: 14, lineHeight: 2 },
-            toast:       { position: "fixed", top: 14, left: "50%", transform: "translateX(-50%)", color: "#fff", padding: "9px 18px", borderRadius: 24, fontWeight: 600, fontSize: 12, zIndex: 999, boxShadow: "0 4px 14px rgba(0,0,0,.2)", whiteSpace: "nowrap" },
-            btnPrimary:  { width: "100%", padding: "14px 0", background: "#000", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "inherit", marginBottom: 10 },
-            btnSecondary:{ width: "100%", padding: "13px 0", background: "#fff", color: "#000", border: "1px solid #ddd", borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: "pointer", fontFamily: "inherit", marginBottom: 10 },
-          };
-        }
+                    <div style={{
+                        background: '#fff',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        border: '1px solid #eee',
+                        marginBottom: '12px'
+                    }}>
+                        <div style={{ fontSize: '10px', fontWeight: '700', color: '#bbb', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>
+                            Transferencia bancaria
+                        </div>
+                        {[
+                            ['Banco', 'Bancolombia'],
+                            ['Tipo', 'Cuenta Corriente'],
+                            ['Número', '069-123456-78'],
+                            ['NIT', '900.123.456-7'],
+                            ['Titular', 'TUHORDER S.A.S']
+                        ].map(([k, v]) => (
+                            <div key={k} style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                padding: '6px 0',
+                                borderBottom: '1px solid #f5f5f5',
+                                fontSize: '13px'
+                            }}>
+                                <span style={{ color: '#888' }}>{k}</span>
+                                <span style={{ fontWeight: '600' }}>{v}</span>
+                            </div>
+                        ))}
+                    </div>
 
-        // ── RENDER ────────────────────────────────────────────────────────────────────
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
+                    <div style={{
+                        background: '#fff',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        border: '1px solid #eee',
+                        marginBottom: '16px'
+                    }}>
+                        <div style={{ fontSize: '10px', fontWeight: '700', color: '#bbb', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>
+                            Resumen
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #f5f5f5', fontSize: '13px' }}>
+                            <span style={{ color: '#888' }}>Subtotal</span>
+                            <span>{formatear(total)}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #f5f5f5', fontSize: '13px' }}>
+                            <span style={{ color: '#888' }}>IVA 16%</span>
+                            <span>{formatear(iva)}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0 0', marginTop: '6px', borderTop: '1px solid #eee', fontSize: '15px', fontWeight: 'bold' }}>
+                            <span>Total a pagar</span>
+                            <span>{formatear(totalConIva)}</span>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={onConfirm}
+                        style={{
+                            width: '100%',
+                            padding: '14px',
+                            background: '#000',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '16px',
+                            fontWeight: '600',
+                           
